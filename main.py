@@ -1,7 +1,3 @@
 print("finals")
-
-
-
-
-x = 5
+a = 5
 
