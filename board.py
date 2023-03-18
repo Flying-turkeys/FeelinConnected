@@ -45,7 +45,7 @@ class Connection:
 
     Representation Invariants:
         - len(self.endpoints) == 2
-        - self.type in {'vertical', 'horizontal', 'left-diagnol', 'right-diagnol'}
+        - self.type in {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'}
     """
     type: str
     endpoints: set[Piece]
