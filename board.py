@@ -10,7 +10,7 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 from __future__ import annotations
 from typing import Optional
 from python_ta.contracts import check_contracts
-from AI_players import AbstractPlayer as Player
+from players import AbstractPlayer as Player
 
 
 @check_contracts
