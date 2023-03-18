@@ -8,7 +8,6 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 """
 
 from __future__ import annotations
-import copy
 from typing import Optional
 from python_ta.contracts import check_contracts
 from AI_players import Player
@@ -35,6 +34,21 @@ class Piece:
     location: tuple[int, int]
     connections: set[Connection]
 
+    def __init__(self, location: tuple[int, int]) -> None:
+        """Initialize this piece with the given location and no connections to other pieces."""
+        self.player = None
+        self.location = location
+        self.connections = set()
+
+    def __repr__(self) -> str:
+        """Return a string representing this piece.
+
+        >>> piece = Piece((0, 0))
+        >>> piece
+        Piece(0, 0)
+        """
+        return f'Piece{self.location}'
+
 
 @check_contracts
 class Connection:
@@ -50,6 +64,34 @@ class Connection:
     """
     type: str
     endpoints: set[Piece]
+
+    def __init__(self, n1: Piece, n2: Piece, direction: str) -> None:
+        """Initialize an empty connection with the two given pieces.
+
+        Also add this connection to n1 and n2.
+
+        Preconditions:
+            - n1 != n2
+            - n1 and n2 are not already connected by a connection
+            - n1 and n2 make a valid connection on the board
+        """
+
+    def get_other_endpoint(self, piece: Piece) -> Piece:
+        """Return the endpoint of this connection that is not equal to the given piece.
+
+        Preconditions:
+            - piece in self.endpoints
+        """
+
+    def __repr__(self) -> str:
+        """Return a string representing this connection.
+
+        >>> connection = Connection(Piece((0, 0)), Piece((0, 1)))
+        >>> repr(connection) in {'Connection(Piece(0, 0), Piece(0, 1))', 'Connection(Piece(0, 1), Piece(0, 0))'}
+        True
+        """
+        endpoints = list(self.endpoints)
+        return f'Connection({endpoints[0]}, {endpoints[1]})'
 
 
 @check_contracts
@@ -104,7 +146,10 @@ class Board:
          Preconditions:
             - n1.player is not None and n2.player is not None
             - n1.player == n2.player
+            - n1 and n2 make a valid connection on the board
          """
+    def get_connection_direction(self, n1: Piece, n2: Piece) -> str:
+        """Returns direction of connection between the two pieces"""
 
     def make_move(self, move: Piece, player: Player) -> None:
         """Assigns Piece to player and adds it to the board’s corresponding
@@ -126,3 +171,8 @@ class Board:
         new_game = self._copy()
         new_game.make_move(move, player)
         return new_game
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod(verbose=True)

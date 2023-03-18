@@ -6,12 +6,12 @@ This file contains the data classes that will compose the AI used to create the 
 
 This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
 """
-from board import Board
+#from board import Board
 
 
 class Player:
     """"""
-    status: Board
+    #status: Board
     def __init__(self):
         """"""
         raise NotImplementedError
