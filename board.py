@@ -14,7 +14,7 @@ from python_ta.contracts import check_contracts
 
 @check_contracts
 class Piece:
-    """A piece that represents a piece in a Connect 4 board.
+    """A node that represents a piece in a Connect 4 board.
 
     Instance Attributes
         - player:
