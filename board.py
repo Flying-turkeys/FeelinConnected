@@ -99,7 +99,7 @@ class Board:
     def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> Connection:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
         of their connection. Returns the new connection.
-        # TODO: Maybe we don't need to return connection but added it any way just in case (can remove later)
+        # TODO: Maybe we don't need to return connection but added it any way just in case (can change later)
 
          Preconditions:
             - n1.player is not None and n2.player is not None
