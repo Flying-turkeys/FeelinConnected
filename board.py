@@ -127,8 +127,7 @@ class Board:
         return new_game
 
     def first_player_turn(self) -> bool:
-        """Return whether it is the first player turn.
-        """
+        """Return whether it is the first player turn."""
 
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
