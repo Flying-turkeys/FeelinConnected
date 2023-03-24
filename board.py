@@ -9,11 +9,9 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 
 from __future__ import annotations
 from typing import Optional
-from python_ta.contracts import check_contracts
 from players import AbstractPlayer as Player
 
 
-@check_contracts
 class Piece:
     """A node that represents a piece in a Connect 4 board.
 
@@ -50,7 +48,6 @@ class Piece:
         return f'Piece{self.location}'
 
 
-@check_contracts
 class Connection:
     """A link (or "edge") connecting two pieces on a Connect 4 board.
 
@@ -94,7 +91,6 @@ class Connection:
         return f'Connection({endpoints[0]}, {endpoints[1]})'
 
 
-@check_contracts
 class Board:
     """A graph that represents a Connect 4 board and holds all empty and non-empty spaces/pieces.
 
@@ -105,7 +101,6 @@ class Board:
     Representation Invariants:
         - len(self.player_moves) == 2
         - all(type in {'P1', 'P2'} for type in self.player_moves)
-        - all(isinstance(moves, int) for address in self._nodes)
         - 5 <= self.width <= 9
     """
     moves: set[Piece]

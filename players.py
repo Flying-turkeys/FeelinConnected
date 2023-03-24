@@ -48,3 +48,8 @@ class GreedyGuesser(AbstractPlayer):
 
     def make_move(self) -> None:
         """Abstract method for a player making a move on the board"""
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod(verbose=True)
