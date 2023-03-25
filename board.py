@@ -135,7 +135,7 @@ class Board:
         Preconditions:
             - 5 <= width <= 9
         """
-
+        #sukjeet
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
@@ -145,15 +145,15 @@ class Board:
 
     def first_player_turn(self) -> bool:
         """Return whether it is the first player turn."""
-
+    #sukjeet
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
-
+        # aabha
     def get_winner(self) -> Optional[Player]:
         """Returns corresponding player if one of the two have 3 connections
         (4 piecs) in the same direction.
         """
-
+        #Aabha
     def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> Connection:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
         of their connection. Returns the new connection.
@@ -164,9 +164,11 @@ class Board:
             - n1.player == n2.player
             - n1 and n2 make a valid connection on the board
          """
+        #ALI
     def get_connection_direction(self, n1: Piece, n2: Piece) -> str:
         """Returns direction of connection between the two pieces"""
 
+        # ALI
     def make_move(self, move: Piece, player: Player) -> None:
         """Assigns Piece to player and adds it to the board’s corresponding
         player moves attribute. Also updates any connections this move may make.
@@ -175,6 +177,7 @@ class Board:
             - move.player is None
             - move.location is a valid position to drop a piece (not a floating piece)
         """
+        # Ethan
 
     def copy_and_record_move(self, move: Piece, player: Player) -> Board:
         """Return a copy of this game state with the given status recorded.
