@@ -15,6 +15,7 @@ class AbstractPlayer:
     status: Board
 
     def __init__(self) -> None:
+
         """Abstract method for initializing this player"""
         raise NotImplementedError
 
