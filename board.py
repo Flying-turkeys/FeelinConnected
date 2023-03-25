@@ -22,22 +22,25 @@ class Piece:
         - location:
             The address (i.e., unique identifier) of this node.
         - connections:
-            A list containing the connections for this piece.
+            A dictionary mapping the type of connection to a connection.
 
     Representation Invariants:
+        - all(key in {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'} for key in self.connections)
         - all(point >= 0 for point in self.location)
         - all(self in conn.endpoints for conn in self.connections)
     """
     player: Optional[Player]
     location: tuple[int, int]
-    # should connections be a dictionary mapping either the address or the type of connection to connection?
-    connections: dict[tuple[int, int], Connection]
+    connections: dict[str, Connection]
 
     def __init__(self, location: tuple[int, int]) -> None:
         """Initialize this piece with the given location and no connections to other pieces."""
         self.player = None
         self.location = location
         self.connections = {}
+
+    def update_piece(self, player: Player) -> None:
+        """"""
 
     def __repr__(self) -> str:
         """Return a string representing this piece.
