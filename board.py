@@ -29,7 +29,7 @@ class Piece:
         - all(point >= 0 for point in self.location)
         - all(self in conn.endpoints for conn in self.connections)
     """
-    player: Optional[Player]
+    player: Optional[str]
     location: tuple[int, int]
     connections: dict[str, Connection]
 
@@ -39,8 +39,9 @@ class Piece:
         self.location = location
         self.connections = {}
 
-    def update_piece(self, player: Player) -> None:
-        """"""
+    def update_piece(self, player: str) -> None:
+        """Updates the player of the piece"""
+        self.player = player
 
     def __repr__(self) -> str:
         """Return a string representing this piece.
@@ -153,7 +154,7 @@ class Board:
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
         # aabha
-    def get_winner(self) -> Optional[Player]:
+    def get_winner(self) -> Optional[str]:
         """Returns corresponding player if one of the two have 3 connections
         (4 piecs) in the same direction.
         """
@@ -173,7 +174,7 @@ class Board:
         """Returns direction of connection between the two pieces"""
 
         # ALI
-    def make_move(self, move: Piece, player: Player) -> None:
+    def make_move(self, move: Piece, player: str) -> None:
         """Assigns Piece to player and adds it to the board’s corresponding
         player moves attribute. Also updates any connections this move may make.
 
@@ -181,9 +182,10 @@ class Board:
             - move.player is None
             - move.location is a valid position to drop a piece (not a floating piece)
         """
-        # Ethan
+        move.update_piece(player)
+        for piece in self.player_moves[player]
 
-    def copy_and_record_move(self, move: Piece, player: Player) -> Board:
+    def copy_and_record_move(self, move: Piece, player: str) -> Board:
         """Return a copy of this game state with the given status recorded.
 
         Preconditions:
