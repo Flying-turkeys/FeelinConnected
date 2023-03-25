@@ -31,13 +31,13 @@ class Piece:
     player: Optional[Player]
     location: tuple[int, int]
     # should connections be a dictionary mapping either the address or the type of connection to connection?
-    connections: set[Connection]
+    connections: dict[tuple[int, int], Connection]
 
     def __init__(self, location: tuple[int, int]) -> None:
         """Initialize this piece with the given location and no connections to other pieces."""
         self.player = None
         self.location = location
-        self.connections = set()
+        self.connections = {}
 
     def __repr__(self) -> str:
         """Return a string representing this piece.
@@ -91,7 +91,6 @@ class Connection:
         """
         return (self.endpoints - {piece}).pop()
 
-
     def __repr__(self) -> str:
         """Return a string representing this connection.
 
@@ -107,8 +106,9 @@ class Board:
     """A graph that represents a Connect 4 board and holds all empty and non-empty spaces/pieces.
 
     Instance Attributes:
-        - type: The direction (type) of connection two pices make.
-        - endpoints: The two pieces that are linked by this connection.
+        - moves: all moves in the graph
+        - player_moves: moves categroized with p1 and p2
+        - width: width of the board
 
     Representation Invariants:
         - len(self.player_moves) == 2
