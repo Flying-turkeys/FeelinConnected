@@ -32,6 +32,7 @@ class Piece:
     """
     player: Optional[Player]
     location: tuple[int, int]
+    # should connections be a dictionary mapping either the address or the type of connection to connection?
     connections: set[Connection]
 
     def __init__(self, location: tuple[int, int]) -> None:
@@ -55,7 +56,7 @@ class Connection:
     """A link (or "edge") connecting two pieces on a Connect 4 board.
 
     Instance Attributes:
-        - type: The direction (type) of connection two pices make.
+        - type: The direction (type) of connection two pieces make.
         - endpoints: The two pieces that are linked by this connection.
 
     Representation Invariants:
@@ -75,6 +76,20 @@ class Connection:
             - n1 and n2 are not already connected by a connection
             - n1 and n2 make a valid connection on the board
         """
+        location1 = n1.location
+        location2 = n2.location
+        if location2[0] == location1[0] + 1:
+            if location2[1] == location1[1]:
+                self.type = 'vertical'
+            elif location2[1] == location1[1] + 1:
+                self.type = 'right-diagonal'
+            elif location2[1] == location1[1] - 1:
+                self.type = 'left-diagonal'
+
+
+
+
+
 
     def get_other_endpoint(self, piece: Piece) -> Piece:
         """Return the endpoint of this connection that is not equal to the given piece.
@@ -82,6 +97,8 @@ class Connection:
         Preconditions:
             - piece in self.endpoints
         """
+        return (self.endpoints - {piece}).pop()
+
 
     def __repr__(self) -> str:
         """Return a string representing this connection.
