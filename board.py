@@ -136,6 +136,7 @@ class Board:
             - 5 <= width <= 9
         """
         #sukjeet
+        ...
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
