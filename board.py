@@ -183,7 +183,18 @@ class Board:
             - move.location is a valid position to drop a piece (not a floating piece)
         """
         move.update_piece(player)
-        for piece in self.player_moves[player]
+
+        x_pos = move.location[0]
+        y_pos = move.location[1]
+        for piece in self.player_moves[player]:
+            if piece.location in {(x_pos + 1, y_pos + 1), (x_pos - 1, y_pos - 1)}:
+                self.add_connection(move, piece, 'right-diagonal')
+            elif piece.location in {(x_pos + 1, y_pos), (x_pos - 1, y_pos)}:
+                self.add_connection(move, piece, 'vertical')
+            elif piece.location in {(x_pos, y_pos + 1), (x_pos, y_pos - 1)}:
+                self.add_connection(move, piece, 'horizontal')
+            elif piece.location in {(x_pos + 1, y_pos - 1), (x_pos - 1, y_pos + 1)}:
+                self.add_connection(move, piece, 'left-diagonal')
 
     def copy_and_record_move(self, move: Piece, player: str) -> Board:
         """Return a copy of this game state with the given status recorded.
