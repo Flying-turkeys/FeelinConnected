@@ -71,6 +71,8 @@ class Connection:
 
         Also add this connection to n1 and n2.
 
+        Raise ValueError if the connection is not valid. That is, the pieces are not adjacent in any way.
+
         Preconditions:
             - n1 != n2
             - n1 and n2 are not already connected by a connection
@@ -78,13 +80,21 @@ class Connection:
         """
         location1 = n1.location
         location2 = n2.location
-        if location2[0] == location1[0] + 1:
-            if location2[1] == location1[1]:
-                self.type = 'vertical'
-            elif location2[1] == location1[1] + 1:
-                self.type = 'right-diagonal'
-            elif location2[1] == location1[1] - 1:
-                self.type = 'left-diagonal'
+        if location2 in {(location1[0] + 1, location1[0] + 1), (location1[0] - 1, location1[0] - 1)}:
+            self.type = 'right-diagonal'
+            self.endpoints = {n1, n2}
+        elif location2 in {(location1[0] + 1, location1[0]), (location1[0] - 1, location1[0])}:
+            self.type = 'vertical'
+            self.endpoints = {n1, n2}
+        elif location2 in {(location1[0], location1[0] + 1), (location1[0], location1[0] - 1)}:
+            self.type = 'horizontal'
+            self.endpoints = {n1, n2}
+        elif location2 in {(location1[0] + 1, location1[0] - 1), (location1[0] - 1, location1[0] + 1)}:
+            self.type = 'left-diagonal'
+            self.endpoints = {n1, n2}
+        else:
+            raise ValueError
+
 
 
 
