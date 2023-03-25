@@ -63,7 +63,7 @@ class Connection:
     type: str
     endpoints: set[Piece]
 
-    def __init__(self, n1: Piece, n2: Piece, direction: str) -> None:
+    def __init__(self, n1: Piece, n2: Piece) -> None:
         """Initialize an empty connection with the two given pieces.
 
         Also add this connection to n1 and n2.
