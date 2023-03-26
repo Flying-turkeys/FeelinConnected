@@ -257,7 +257,6 @@ class Board:
             return 0
         elif next_pieces[0] is None:
             return 1
-        # test if this really works
         return 1 + self.count_connected_pieces(next_pieces[0], direction, visited)
 
     def copy_and_record_move(self, move: Piece, player: str) -> Board:
