@@ -143,32 +143,30 @@ class Board:
                 possible_moves.add(self._pieces[(x_cord, min(possible_y))])
         return possible_moves
 
-    def get_winner(self) -> Optional[str]:
-        """Returns corresponding player if one of the two have 3 connections
-        (4 piecs) in the same direction.
-        """
-        types = {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'}
-        p1_winner = any(self._is_player_winner("P1", t) for t in types)
-        p2_winner = any(self._is_player_winner("P2", t) for t in types)
-        if p1_winner:
-            return "P1"
-        elif p2_winner:
-            return "P2"
-        elif all(self._pieces[key].player is not None for key in self._pieces):
-            return "Tie"
-        else:
-            return None
-
     def get_all_paths(self, direction: str, player: str) -> list[list[Piece]]:
         pass
 
-
-    def _is_player_winner(self, player: str, direction: str):
-        """Returns corresponding player if one of the two have 3 connections
+    def get_winner(self) -> Optional[tuple[str, list[Piece]]]:
+        """Returns player and path of win if one of the players has a path of 4 connections
         (4 piecs) in the same direction.
         """
+        directions = {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'}
+        connection_lengths = {}
+        for d in directions:
+            paths_p1 = self.get_all_paths(d, "P1")
+            connection_lengths["P1"] = max(paths_p1, key=len)
 
+            paths_p2 = self.get_all_paths(d, "P2")
+            connection_lengths["P2"] = max(paths_p2, key=len)
 
+        if len(connection_lengths["P1"]) >= 4:
+            return ("P1", connection_lengths["P1"])
+        elif len(connection_lengths["P2"]) >= 4:
+            return ("P2", connection_lengths["P1"])
+        elif all(self._pieces[key].player is not None for key in self._pieces):
+            return ("Tie", [])
+        else:
+            return None
 
     def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> bool:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
