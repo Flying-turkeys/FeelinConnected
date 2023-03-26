@@ -22,7 +22,7 @@ class Piece:
         - location:
             The address (i.e., unique identifier) of this node.
         - connections:
-            A dictionary mapping the type of connection to a connection.
+            A dictionary mapping the location of connection to a connection.
 
     Representation Invariants:
         - all(key in {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'} for key in self.connections)
@@ -31,13 +31,17 @@ class Piece:
     """
     player: Optional[str]
     location: tuple[int, int]
-    connections: dict[str, Connection]
+    connections: dict[str, list[Connection]]
 
     def __init__(self, location: tuple[int, int]) -> None:
         """Initialize this piece with the given location and no connections to other pieces."""
         self.player = None
         self.location = location
-        self.connections = {}
+        self.connections = {'vertical': [], 'horizontal': [], 'right-diagonal': [], 'left-diagonal': []}
+
+    def update_piece(self, player: str) -> None:
+        """Updates the player of the piece"""
+        self.player = player
 
     def update_piece(self, player: str) -> None:
         """Updates the player of the piece"""
@@ -79,22 +83,8 @@ class Connection:
             - n1 and n2 are not already connected by a connection
             - n1 and n2 make a valid connection on the board
         """
-        location1 = n1.location
-        location2 = n2.location
-        if location2 in {(location1[0] + 1, location1[0] + 1), (location1[0] - 1, location1[0] - 1)}:
-            self.type = 'right-diagonal'
-            self.endpoints = {n1, n2}
-        elif location2 in {(location1[0] + 1, location1[0]), (location1[0] - 1, location1[0])}:
-            self.type = 'vertical'
-            self.endpoints = {n1, n2}
-        elif location2 in {(location1[0], location1[0] + 1), (location1[0], location1[0] - 1)}:
-            self.type = 'horizontal'
-            self.endpoints = {n1, n2}
-        elif location2 in {(location1[0] + 1, location1[0] - 1), (location1[0] - 1, location1[0] + 1)}:
-            self.type = 'left-diagonal'
-            self.endpoints = {n1, n2}
-        else:
-            raise ValueError
+        self.type = direction
+        self.endpoints = {n1, n2}
 
     def get_other_endpoint(self, piece: Piece) -> Piece:
         """Return the endpoint of this connection that is not equal to the given piece.
@@ -139,7 +129,7 @@ class Board:
             - 5 <= width <= 9
         """
         #sukjeet
-        ...
+
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
@@ -152,25 +142,38 @@ class Board:
     #sukjeet
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
+
         # aabha
     def get_winner(self) -> Optional[str]:
         """Returns corresponding player if one of the two have 3 connections
         (4 piecs) in the same direction.
         """
         #Aabha
-    def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> Connection:
+    def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> bool:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
-        of their connection. Returns the new connection.
-        # TODO: Maybe we don't need to return connection but added it any way just in case (can change later)
+        of their connection. Returns whether the connecton was added successfully.
 
          Preconditions:
             - n1.player is not None and n2.player is not None
             - n1.player == n2.player
             - n1 and n2 make a valid connection on the board
          """
+        connection = Connection(n1, n2, connection_type)
+        if connection in n1.connections[connection_type]:
+            return False
+        else:
+            n1.connections[connection_type].append(connection)
+            n2.connections[connection_type].append(connection)
+            return True
+
         #ALI
     def get_connection_direction(self, n1: Piece, n2: Piece) -> str:
-        """Returns direction of connection between the two pieces"""
+        """Returns direction of connection between the two pieces.
+        raises a ValueError if there is not an existing connection between the pieces.
+        """
+        # TODO: figure out when this is used?
+        location1 = n1.location
+        location2 = n2.location
 
         # ALI
     def make_move(self, move: Piece, player: str) -> None:
