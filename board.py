@@ -22,15 +22,15 @@ class Piece:
         - location:
             The address (i.e., unique identifier) of this node.
         - connections:
-            A list containing the connections for this piece.
+            A dictionary mapping the location of connection to a connection.
 
     Representation Invariants:
+        - all(key in {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'} for key in self.connections)
         - all(point >= 0 for point in self.location)
         - all(self in conn.endpoints for conn in self.connections)
     """
-    player: Optional[Player]
+    player: Optional[str]
     location: tuple[int, int]
-    # should connections be a dictionary mapping either the address or the type of connection to connection?
     connections: dict[tuple[int, int], Connection]
 
     def __init__(self, location: tuple[int, int]) -> None:
@@ -38,6 +38,10 @@ class Piece:
         self.player = None
         self.location = location
         self.connections = {}
+
+    def update_piece(self, player: str) -> None:
+        """Updates the player of the piece"""
+        self.player = player
 
     def __repr__(self) -> str:
         """Return a string representing this piece.
@@ -63,7 +67,7 @@ class Connection:
     type: str
     endpoints: set[Piece]
 
-    def __init__(self, n1: Piece, n2: Piece) -> None:
+    def __init__(self, n1: Piece, n2: Piece, direction: str) -> None:
         """Initialize an empty connection with the two given pieces.
 
         Also add this connection to n1 and n2.
@@ -75,23 +79,8 @@ class Connection:
             - n1 and n2 are not already connected by a connection
             - n1 and n2 make a valid connection on the board
         """
-        location1 = n1.location
-        location2 = n2.location
-        if location2 in {(location1[0] + 1, location1[0] + 1), (location1[0] - 1, location1[0] - 1)}:
-            self.type = 'right-diagonal'
-            self.endpoints = {n1, n2}
-        elif location2 in {(location1[0] + 1, location1[0]), (location1[0] - 1, location1[0])}:
-            self.type = 'vertical'
-            self.endpoints = {n1, n2}
-        elif location2 in {(location1[0], location1[0] + 1), (location1[0], location1[0] - 1)}:
-            self.type = 'horizontal'
-            self.endpoints = {n1, n2}
-        elif location2 in {(location1[0] + 1, location1[0] - 1), (location1[0] - 1, location1[0] + 1)}:
-            self.type = 'left-diagonal'
-            self.endpoints = {n1, n2}
-        else:
-            raise ValueError
-
+        self.type = direction
+        self.endpoints = {n1, n2}
 
     def get_other_endpoint(self, piece: Piece) -> Piece:
         """Return the endpoint of this connection that is not equal to the given piece.
@@ -135,7 +124,8 @@ class Board:
         Preconditions:
             - 5 <= width <= 9
         """
-
+        #sukjeet
+        ...
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
@@ -145,29 +135,45 @@ class Board:
 
     def first_player_turn(self) -> bool:
         """Return whether it is the first player turn."""
-
+    #sukjeet
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
-
-    def get_winner(self) -> Optional[Player]:
+        # aabha
+    def get_winner(self) -> Optional[str]:
         """Returns corresponding player if one of the two have 3 connections
         (4 piecs) in the same direction.
         """
-
-    def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> Connection:
+        #Aabha
+    def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> bool:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
-        of their connection. Returns the new connection.
-        # TODO: Maybe we don't need to return connection but added it any way just in case (can change later)
+        of their connection. Returns whether the connecton was added successfully.
 
          Preconditions:
             - n1.player is not None and n2.player is not None
             - n1.player == n2.player
             - n1 and n2 make a valid connection on the board
          """
-    def get_connection_direction(self, n1: Piece, n2: Piece) -> str:
-        """Returns direction of connection between the two pieces"""
+        connection = Connection(n1, n2, connection_type)
+        if n1.location in n2.connections:
+            return False
+        else:
+            n1.connections[n2.location] = connection
+            n2.connections[n1.location] = connection
+            return True
 
-    def make_move(self, move: Piece, player: Player) -> None:
+        #ALI
+    def get_connection_direction(self, n1: Piece, n2: Piece) -> str:
+        """Returns direction of connection between the two pieces.
+        raises a ValueError if there is not an existing connection between the pieces.
+        """
+        # TODO: figure out when this is used?
+        if n1.location not in n2.connections:
+            raise ValueError
+        else:
+            return n2.connections[n1.location].type
+
+        # ALI
+    def make_move(self, move: Piece, player: str) -> None:
         """Assigns Piece to player and adds it to the board’s corresponding
         player moves attribute. Also updates any connections this move may make.
 
@@ -175,8 +181,21 @@ class Board:
             - move.player is None
             - move.location is a valid position to drop a piece (not a floating piece)
         """
+        move.update_piece(player)
+        # TODO: do we want to add this move to the players moves?
+        x_pos = move.location[0]
+        y_pos = move.location[1]
+        for piece in self.player_moves[player]:
+            if piece.location in {(x_pos + 1, y_pos + 1), (x_pos - 1, y_pos - 1)}:
+                self.add_connection(move, piece, 'right-diagonal')
+            elif piece.location in {(x_pos + 1, y_pos), (x_pos - 1, y_pos)}:
+                self.add_connection(move, piece, 'vertical')
+            elif piece.location in {(x_pos, y_pos + 1), (x_pos, y_pos - 1)}:
+                self.add_connection(move, piece, 'horizontal')
+            elif piece.location in {(x_pos + 1, y_pos - 1), (x_pos - 1, y_pos + 1)}:
+                self.add_connection(move, piece, 'left-diagonal')
 
-    def copy_and_record_move(self, move: Piece, player: Player) -> Board:
+    def copy_and_record_move(self, move: Piece, player: str) -> Board:
         """Return a copy of this game state with the given status recorded.
 
         Preconditions:
