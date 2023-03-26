@@ -38,20 +38,6 @@ class Piece:
         """Updates the player of the piece"""
         self.player = player
 
-    # def get_paths(self, visited: set[Piece], direction: str, d: int) -> list[set[Piece]]:
-    #     """Gets all paths from a specific direction"""
-    #     if d == 0:
-    #         return [{self}]
-    #     paths = []
-    #     v = visited.union({self})
-    #     for connection in self.connections[direction]:
-    #         endpoint_of_channel = connection.get_other_endpoint(self)
-    #         if endpoint_of_channel not in visited:
-    #             for path in endpoint_of_channel.get_paths(v, direction, d - 1):
-    #                 paths.append([{self, path}])
-    #                 #paths.append([self.channels[address]] + path)
-    #     return paths
-
     def __repr__(self) -> str:
         """Return a string representing this piece.
         >>> piece = Piece((0, 0))
@@ -122,6 +108,7 @@ class Board:
         Preconditions:
             - 5 <= width <= 9
         """
+        self._pieces = {}
         self.width = width
         self.player_moves = {"P1": [], "P2": []}
         for i in range(width):
@@ -129,6 +116,23 @@ class Board:
                 location = (i, j)
                 new_piece = Piece(location)
                 self._pieces[location] = new_piece
+
+    def board_to_tabular(self) -> list[list[int]]:
+        """Returns the boards state in tabular data"""
+        tabular_so_far = []
+        for j in range(self.width):
+            row = []
+            for i in range(self.width):
+                piece = self._pieces[(i, j)]
+                if piece.player == "P1":
+                    identifier = 1
+                elif piece.player == "P2":
+                    identifier = 2
+                else:
+                    identifier = 0
+                row.append(identifier)
+            tabular_so_far.append(row)
+        return tabular_so_far
 
     def _copy(self) -> Board:
         """Return a copy of this game state."""
@@ -159,7 +163,20 @@ class Board:
         return possible_moves
 
     def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
-        pass
+        """Gets all paths of piece for a given player in a specific direction"""
+        pieces = self.player_moves[player]
+        all_paths = []
+        for piece in pieces:
+            path = set()
+            path.add(piece)
+            for connection in piece.connections[direction]:
+                next_piece = connection.get_other_endpoint(piece)
+                path.add(next_piece)
+                for connection1 in next_piece.connections[direction]:
+                    next_next_piece = connection1.get_other_endpoint(piece)
+                    path.add(next_next_piece)
+            all_paths.append(path)
+        return all_paths
 
     def get_winner(self) -> Optional[tuple[str, set[Piece]]]:
         """Returns player and path of win if one of the players has a path of 4 connections
