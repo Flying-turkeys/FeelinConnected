@@ -9,7 +9,7 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 
 from __future__ import annotations
 from typing import Optional
-from players import AbstractPlayer as Player
+# from players import AbstractPlayer as Player
 
 
 class Piece:
@@ -128,10 +128,31 @@ class Board:
         Preconditions:
             - 5 <= width <= 9
         """
+        self._pieces = {}
+        self.width = width
+        self.player_moves = {"P1": [], "P2": []}
         for i in range(width):
             for j in range(width):
-                self._pieces[(i, j)] = Piece((i, j))
-        self.width = width
+                location = (i, j)
+                new_piece = Piece(location)
+                self._pieces[location] = new_piece
+
+    def board_to_tabular(self) -> list[list[int]]:
+        """Returns the boards state in tabular data"""
+        tabular_so_far = []
+        for j in range(self.width):
+            row = []
+            for i in range(self.width):
+                piece = self._pieces[(i, j)]
+                if piece.player == "P1":
+                    identifier = 1
+                elif piece.player == "P2":
+                    identifier = 2
+                else:
+                    identifier = 0
+                row.append(identifier)
+            tabular_so_far.append(row)
+        return tabular_so_far
 
     def _copy(self) -> Board:
         """Return a copy of this game state."""
@@ -159,7 +180,7 @@ class Board:
         return possible_moves
 
     def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
-        """ m """
+        """return all the paths that are in player's moves with a specific direction"""
         pieces = self.player_moves[player]
         all_paths = []
         for piece in pieces:
@@ -174,15 +195,34 @@ class Board:
             all_paths.append(path)
         return all_paths
 
-
-
-        # aabha
-    def get_winner(self) -> Optional[str]:
-        """Returns corresponding player if one of the two have 3 connections
+    def get_winner_v2(self) -> Optional[tuple[str, set[Piece]]]:
+        """Returns player and path of win if one of the players has a path of 4 connections
         (4 piecs) in the same direction.
         """
+        directions = {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'}
+        connection_lengths = {"P1": [], "P2": []}
+        for d in directions:
+            paths_p1 = self.get_all_paths(d, "P1")
+            if paths_p1:
+                connection_lengths["P1"].append(max(paths_p1, key=len))
 
-        #Aabha
+            paths_p2 = self.get_all_paths(d, "P2")
+            if paths_p2:
+                connection_lengths["P2"].append(max(paths_p2, key=len))
+        if connection_lengths['P1']:
+            connection_lengths['P1'] = max(connection_lengths['P1'], key=len)
+        if connection_lengths['P2']:
+            connection_lengths['P2'] = max(connection_lengths['P2'], key=len)
+
+        if len(connection_lengths["P1"]) >= 4:
+            return ("P1", connection_lengths["P1"])
+        elif len(connection_lengths["P2"]) >= 4:
+            return ("P2", connection_lengths["P1"])
+        elif all(self._pieces[key].player is not None for key in self._pieces):
+            return ("Tie", set())
+        else:
+            return None
+
     def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> bool:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
         of their connection. Returns whether the connecton was added successfully.
@@ -201,42 +241,43 @@ class Board:
             return True
 
         #ALI
-    def get_connection_direction(self, n1: Piece, n2: Piece) -> str:
+
+    def get_connection_direction(self, n1: Piece, n2: Piece) -> Optional[str]:
         """Returns direction of connection between the two pieces.
-        raises a ValueError if there is not an existing connection between the pieces.
+        returns none if no connection exists.
         """
-        # TODO: figure out when this is used?
-        location1 = n1.location
-        location2 = n2.location
+        x_pos = n2.location[0]
+        y_pos = n2.location[1]
+        if n1.location in {(x_pos + 1, y_pos + 1), (x_pos - 1, y_pos - 1)}:
+            return 'right-diagonal'
+        elif n1.location in {(x_pos + 1, y_pos), (x_pos - 1, y_pos)}:
+            return 'vertical'
+        elif n1.location in {(x_pos, y_pos + 1), (x_pos, y_pos - 1)}:
+            return 'horizontal'
+        elif n1.location in {(x_pos + 1, y_pos - 1), (x_pos - 1, y_pos + 1)}:
+            return 'left-diagonal'
+        else:
+            return None
 
         # ALI
+
     def make_move(self, move: Piece, player: str) -> None:
         """Assigns Piece to player and adds it to the board’s corresponding
         player moves attribute. Also updates any connections this move may make.
-
         Preconditions:
             - move.player is None
             - move.location is a valid position to drop a piece (not a floating piece)
         """
         move.update_piece(player)
-
-        self.moves.append(move)
         if self.player_moves[player]:
             self.player_moves[player].append(move)
         else:
             self.player_moves[player] = [move]
 
-        x_pos = move.location[0]
-        y_pos = move.location[1]
         for piece in self.player_moves[player]:
-            if piece.location in {(x_pos + 1, y_pos + 1), (x_pos - 1, y_pos - 1)}:
-                self.add_connection(move, piece, 'right-diagonal')
-            elif piece.location in {(x_pos + 1, y_pos), (x_pos - 1, y_pos)}:
-                self.add_connection(move, piece, 'vertical')
-            elif piece.location in {(x_pos, y_pos + 1), (x_pos, y_pos - 1)}:
-                self.add_connection(move, piece, 'horizontal')
-            elif piece.location in {(x_pos + 1, y_pos - 1), (x_pos - 1, y_pos + 1)}:
-                self.add_connection(move, piece, 'left-diagonal')
+            connection_direction = self.get_connection_direction(piece, move)
+            if connection_direction:
+                self.add_connection(move, piece, connection_direction)
 
     def copy_and_record_move(self, move: Piece, player: str) -> Board:
         """Return a copy of this game state with the given status recorded.
