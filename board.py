@@ -154,11 +154,49 @@ class Board:
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
         # aabha
+        possible_moves = set()
+        for column in range(self.width):
+            for row in range(self.width):
+                new_spot = Piece((row, column))
+                if new_spot not in self.moves:
+                    possible_moves.add(new_spot)
+                    break  # exits loop as soon as lowest empty row is found because piece drops dowm to lowest spot
+        return possible_moves
+
     def get_winner(self) -> Optional[str]:
         """Returns corresponding player if one of the two have 3 connections
         (4 piecs) in the same direction.
         """
-        #Aabha
+        # Aabha
+        # TODO this function is getting a bit complicated because need to first count connections of each piece in all directions, check if there are 4 in a row of same direction then return that player as the winner
+        for player, moves in self.player_moves.items():
+            if self.four_in_row(moves):
+                return player
+        return None
+
+    def four_in_row(self, pieces: set[Piece]) -> bool:
+        """Return if there are any four connected pieces on the board"""
+        for piece in pieces:
+            for direction in piece.connections:
+                count = self.count_connected_pieces(piece, direction, set())
+                if count == 4:
+                    return True
+        return False
+
+    def count_connected_pieces(self, piece: Piece, direction: str, visited: set[Piece]) -> int:
+        """return the amount of connected pieces in given direction starting from given piece"""
+        if piece in visited:
+            return 0
+        visited.add(piece)
+        if direction not in piece.connections:
+            return 1
+        # gets next piece by searching current piece connections in the given direction, recursive?
+        next_pieces = [p for p in piece.connections[direction].endpoints if p != piece]
+        if next_pieces[0] is None:
+            return 1
+        # test if this really works
+        return 1 + self.count_connected_pieces(next_pieces[0], direction, visited)
+
     def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> Connection:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
         of their connection. Returns the new connection.
