@@ -159,6 +159,7 @@ class Board:
         return possible_moves
 
     def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
+        """ m """
         pieces = self.player_moves[player]
         all_paths = []
         for piece in pieces:
