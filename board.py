@@ -96,7 +96,6 @@ class Connection:
         else:
             raise ValueError
 
-
     def get_other_endpoint(self, piece: Piece) -> Piece:
         """Return the endpoint of this connection that is not equal to the given piece.
 
@@ -129,8 +128,8 @@ class Board:
         - all(type in {'P1', 'P2'} for type in self.player_moves)
         - 5 <= self.width <= 9
     """
-    moves: set[Piece]
-    player_moves: dict[str, set[Piece]]
+    moves: list[Piece]
+    player_moves: dict[str, list[Piece]]
     width: int
 
     def __init__(self, width: int) -> None:
@@ -183,6 +182,12 @@ class Board:
             - move.location is a valid position to drop a piece (not a floating piece)
         """
         move.update_piece(player)
+
+        self.moves.append(move)
+        if self.player_moves[player]:
+            self.player_moves[player].append(move)
+        else:
+            self.player_moves[player] = [move]
 
         x_pos = move.location[0]
         y_pos = move.location[1]
