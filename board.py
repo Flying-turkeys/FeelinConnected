@@ -163,6 +163,7 @@ class Board:
         """Returns corresponding player if one of the two have 3 connections
         (4 piecs) in the same direction.
         """
+
         #Aabha
     def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> bool:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
