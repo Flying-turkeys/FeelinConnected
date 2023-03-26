@@ -31,7 +31,7 @@ class Piece:
     """
     player: Optional[str]
     location: tuple[int, int]
-    connections: dict[tuple[int, int], Connection]
+    connections: dict[str, list[Connection]]
 
     def __init__(self, location: tuple[int, int]) -> None:
         """Initialize this piece with the given location and no connections to other pieces."""
@@ -125,6 +125,7 @@ class Board:
             - 5 <= width <= 9
         """
         #sukjeet
+
         ...
     def _copy(self) -> Board:
         """Return a copy of this game state."""
@@ -157,8 +158,8 @@ class Board:
         if n1.location in n2.connections:
             return False
         else:
-            n1.connections[n2.location] = connection
-            n2.connections[n1.location] = connection
+            n1.connections[connection_type].append(connection)
+            n2.connections[connection_type].append(connection)
             return True
 
         #ALI
@@ -167,10 +168,9 @@ class Board:
         raises a ValueError if there is not an existing connection between the pieces.
         """
         # TODO: figure out when this is used?
-        if n1.location not in n2.connections:
-            raise ValueError
-        else:
-            return n2.connections[n1.location].type
+        location1 = n1.location
+        location2 = n2.location
+
 
         # ALI
     def make_move(self, move: Piece, player: str) -> None:
@@ -182,7 +182,6 @@ class Board:
             - move.location is a valid position to drop a piece (not a floating piece)
         """
         move.update_piece(player)
-        # TODO: do we want to add this move to the players moves?
         x_pos = move.location[0]
         y_pos = move.location[1]
         for piece in self.player_moves[player]:
