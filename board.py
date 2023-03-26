@@ -91,7 +91,7 @@ class Connection:
 class Board:
     """A graph that represents a Connect 4 board and holds all empty and non-empty spaces/pieces.
     Instance Attributes:
-        - moves: all moves in the graph
+        - moves: a mapping of all pieces to their location.
         - player_moves: moves categroized with p1 and p2
         - width: width of the board
     Representation Invariants:
