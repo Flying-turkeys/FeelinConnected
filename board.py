@@ -39,10 +39,6 @@ class Piece:
         """Updates the player of the piece"""
         self.player = player
 
-    def update_piece(self, player: str) -> None:
-        """Updates the player of the piece"""
-        self.player = player
-
     def __repr__(self) -> str:
         """Return a string representing this piece.
         >>> piece = Piece((0, 0))
@@ -101,10 +97,10 @@ class Board:
         - width: width of the board
     Representation Invariants:
         - len(self.player_moves) == 2
-        - all(type in {'P1', 'P2'} for type in self.player_moves)
+        - all(key in {'P1', 'P2'} for key in self.player_moves)
         - 5 <= self.width <= 9
     """
-    moves: list[Piece]
+    _pieces: dict[tuple[int, int], Piece]
     player_moves: dict[str, list[Piece]]
     width: int
 
@@ -113,27 +109,61 @@ class Board:
         Preconditions:
             - 5 <= width <= 9
         """
-        #sukjeet
+        self.width = width
+        self.player_moves = {"P1": [], "P2": []}
+        for i in range(width):
+            for j in range(width):
+                location = (j, i)
+                new_piece = Piece(location)
+                self._pieces[location] = new_piece
 
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
-        new_game.moves = self.moves
+        new_game.moves = self._pieces
         new_game.player_moves = self.player_moves
         return new_game
 
     def first_player_turn(self) -> bool:
         """Return whether it is the first player turn."""
-    #sukjeet
+        num_p1_moves = len(self.player_moves["P1"])
+        num_p2_moves = len(self.player_moves["P2"])
+        if num_p1_moves == num_p2_moves:
+            return True
+        else:
+            return False
+
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
 
-        # aabha
     def get_winner(self) -> Optional[str]:
         """Returns corresponding player if one of the two have 3 connections
         (4 piecs) in the same direction.
         """
-        #Aabha
+        types = {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'}
+        p1_winner = any(self._is_player_winner("P1", t) for t in types)
+        p2_winner = any(self._is_player_winner("P2", t) for t in types)
+        if p1_winner:
+            return "P1"
+        elif p2_winner:
+            return "P2"
+        elif all(self._pieces[key].player is not None for key in self._pieces):
+            return "Tie"
+        else:
+            return None
+
+    def get_all_paths(self, direction: str, player: str) -> list[list[Piece]]:
+        pass
+
+
+    def _is_player_winner(self, player: str, direction: str):
+        """Returns corresponding player if one of the two have 3 connections
+        (4 piecs) in the same direction.
+        """
+        pass
+
+
+
     def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> bool:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
         of their connection. Returns whether the connecton was added successfully.
@@ -176,8 +206,6 @@ class Board:
             - move.location is a valid position to drop a piece (not a floating piece)
         """
         move.update_piece(player)
-
-        self.moves.append(move)
         if self.player_moves[player]:
             self.player_moves[player].append(move)
         else:
