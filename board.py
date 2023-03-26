@@ -152,9 +152,9 @@ class Board:
         possible_moves = set()
         for i in range(self.width):
             j = 0
-            while self._pieces[(i, j)].player is not None and j < self.width:
+            while j < self.width and self._pieces[(i, j)].player is not None:
                 j += 1
-            if self._pieces[(i, j)].player is None:
+            if j != self.width and self._pieces[(i, j)].player is None:
                 possible_moves.add(self._pieces[(i, j)])
         return possible_moves
 
