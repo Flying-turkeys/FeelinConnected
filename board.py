@@ -138,8 +138,7 @@ class Board:
         Preconditions:
             - 5 <= width <= 9
         """
-        #sukjeet
-        ...
+
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
@@ -149,7 +148,9 @@ class Board:
 
     def first_player_turn(self) -> bool:
         """Return whether it is the first player turn."""
-    #sukjeet
+        print()
+
+
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
         # aabha
