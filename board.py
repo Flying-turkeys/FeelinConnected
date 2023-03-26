@@ -8,6 +8,7 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 from __future__ import annotations
 from typing import Optional
 
+
 class Piece:
     """A node that represents a piece in a Connect 4 board.
     Instance Attributes
@@ -36,6 +37,20 @@ class Piece:
     def update_piece(self, player: str) -> None:
         """Updates the player of the piece"""
         self.player = player
+
+    # def get_paths(self, visited: set[Piece], direction: str, d: int) -> list[set[Piece]]:
+    #     """Gets all paths from a specific direction"""
+    #     if d == 0:
+    #         return [{self}]
+    #     paths = []
+    #     v = visited.union({self})
+    #     for connection in self.connections[direction]:
+    #         endpoint_of_channel = connection.get_other_endpoint(self)
+    #         if endpoint_of_channel not in visited:
+    #             for path in endpoint_of_channel.get_paths(v, direction, d - 1):
+    #                 paths.append([{self, path}])
+    #                 #paths.append([self.channels[address]] + path)
+    #     return paths
 
     def __repr__(self) -> str:
         """Return a string representing this piece.
@@ -143,10 +158,10 @@ class Board:
                 possible_moves.add(self._pieces[(x_cord, min(possible_y))])
         return possible_moves
 
-    def get_all_paths(self, direction: str, player: str) -> list[list[Piece]]:
+    def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
         pass
 
-    def get_winner(self) -> Optional[tuple[str, list[Piece]]]:
+    def get_winner(self) -> Optional[tuple[str, set[Piece]]]:
         """Returns player and path of win if one of the players has a path of 4 connections
         (4 piecs) in the same direction.
         """
@@ -164,7 +179,7 @@ class Board:
         elif len(connection_lengths["P2"]) >= 4:
             return ("P2", connection_lengths["P1"])
         elif all(self._pieces[key].player is not None for key in self._pieces):
-            return ("Tie", [])
+            return ("Tie", set())
         else:
             return None
 
