@@ -150,10 +150,10 @@ class Board:
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
         possible_moves = set()
-        for j in range(self.width):
-            i = 0
-            while self._pieces[(i, j)].player is not None and i < self.width:
-                i += 1
+        for i in range(self.width):
+            j = 0
+            while self._pieces[(i, j)].player is not None and j < self.width:
+                j += 1
             if self._pieces[(i, j)].player is None:
                 possible_moves.add(self._pieces[(i, j)])
         return possible_moves
