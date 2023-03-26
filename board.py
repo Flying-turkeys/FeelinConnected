@@ -150,14 +150,22 @@ class Board:
             n2.connections[connection_type].append(connection)
             return True
 
-        #ALI
-    def get_connection_direction(self, n1: Piece, n2: Piece) -> str:
+    def get_connection_direction(self, n1: Piece, n2: Piece) -> Optional[str]:
         """Returns direction of connection between the two pieces.
-        raises a ValueError if there is not an existing connection between the pieces.
+        returns none if no connection exists.
         """
-        # TODO: figure out when this is used?
-        location1 = n1.location
-        location2 = n2.location
+        x_pos = n2.location[0]
+        y_pos = n2.location[1]
+        if n1.location in {(x_pos + 1, y_pos + 1), (x_pos - 1, y_pos - 1)}:
+            return 'right-diagonal'
+        elif n1.location in {(x_pos + 1, y_pos), (x_pos - 1, y_pos)}:
+            return 'vertical'
+        elif n1.location in {(x_pos, y_pos + 1), (x_pos, y_pos - 1)}:
+            return 'horizontal'
+        elif n1.location in {(x_pos + 1, y_pos - 1), (x_pos - 1, y_pos + 1)}:
+            return 'left-diagonal'
+        else:
+            return None
 
         # ALI
     def make_move(self, move: Piece, player: str) -> None:
@@ -175,17 +183,10 @@ class Board:
         else:
             self.player_moves[player] = [move]
 
-        x_pos = move.location[0]
-        y_pos = move.location[1]
         for piece in self.player_moves[player]:
-            if piece.location in {(x_pos + 1, y_pos + 1), (x_pos - 1, y_pos - 1)}:
-                self.add_connection(move, piece, 'right-diagonal')
-            elif piece.location in {(x_pos + 1, y_pos), (x_pos - 1, y_pos)}:
-                self.add_connection(move, piece, 'vertical')
-            elif piece.location in {(x_pos, y_pos + 1), (x_pos, y_pos - 1)}:
-                self.add_connection(move, piece, 'horizontal')
-            elif piece.location in {(x_pos + 1, y_pos - 1), (x_pos - 1, y_pos + 1)}:
-                self.add_connection(move, piece, 'left-diagonal')
+            connection_direction = self.get_connection_direction(piece, move)
+            if connection_direction:
+                self.add_connection(move, piece, connection_direction)
 
     def copy_and_record_move(self, move: Piece, player: str) -> Board:
         """Return a copy of this game state with the given status recorded.
