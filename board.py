@@ -7,8 +7,6 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 
 from __future__ import annotations
 from typing import Optional
-from players import AbstractPlayer as Player
-
 
 class Piece:
     """A node that represents a piece in a Connect 4 board.
@@ -113,7 +111,7 @@ class Board:
         self.player_moves = {"P1": [], "P2": []}
         for i in range(width):
             for j in range(width):
-                location = (j, i)
+                location = (i, j)
                 new_piece = Piece(location)
                 self._pieces[location] = new_piece
 
@@ -135,6 +133,15 @@ class Board:
 
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
+        possible_moves = set()
+        for x_cord in range(self.width):
+            possible_y = []
+            for y_cord in range(self.width):
+                if self._pieces[(x_cord, y_cord)].player is None:
+                    possible_y.append(y_cord)
+            if len(possible_y) > 0:
+                possible_moves.add(self._pieces[(x_cord, min(possible_y))])
+        return possible_moves
 
     def get_winner(self) -> Optional[str]:
         """Returns corresponding player if one of the two have 3 connections
@@ -160,7 +167,6 @@ class Board:
         """Returns corresponding player if one of the two have 3 connections
         (4 piecs) in the same direction.
         """
-        pass
 
 
 
