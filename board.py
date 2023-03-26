@@ -137,23 +137,6 @@ class Board:
                 new_piece = Piece(location)
                 self._pieces[location] = new_piece
 
-    def board_to_tabular(self) -> list[list[int]]:
-        """Returns the boards state in tabular data"""
-        tabular_so_far = []
-        for j in range(self.width):
-            row = []
-            for i in range(self.width):
-                piece = self._pieces[(i, j)]
-                if piece.player == "P1":
-                    identifier = 1
-                elif piece.player == "P2":
-                    identifier = 2
-                else:
-                    identifier = 0
-                row.append(identifier)
-            tabular_so_far.append(row)
-        return tabular_so_far
-
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
