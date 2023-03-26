@@ -150,12 +150,6 @@ class Board:
     def first_player_turn(self) -> bool:
         """Return whether it is the first player turn."""
 
-        num_p1_moves = len(self.player_moves["P1"])
-        num_p2_moves = len(self.player_moves["P2"])
-        if num_p1_moves == num_p2_moves:
-
-        if len(self.player_moves['P1']) == len(self.player_moves['P2']):
-
             return True
         else:
             return False
