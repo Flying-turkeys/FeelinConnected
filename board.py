@@ -37,7 +37,7 @@ class Piece:
         """Initialize this piece with the given location and no connections to other pieces."""
         self.player = None
         self.location = location
-        self.connections = {}
+        self.connections = {'vertical': [], 'horizontal': [], 'right-diagonal': [], 'left-diagonal': []}
 
     def update_piece(self, player: str) -> None:
         """Updates the player of the piece"""
@@ -139,6 +139,8 @@ class Board:
     #sukjeet
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
+
+
         # aabha
     def get_winner(self) -> Optional[str]:
         """Returns corresponding player if one of the two have 3 connections
@@ -155,7 +157,7 @@ class Board:
             - n1 and n2 make a valid connection on the board
          """
         connection = Connection(n1, n2, connection_type)
-        if n1.location in n2.connections:
+        if connection in n1.connections[connection_type]:
             return False
         else:
             n1.connections[connection_type].append(connection)
@@ -170,7 +172,6 @@ class Board:
         # TODO: figure out when this is used?
         location1 = n1.location
         location2 = n2.location
-
 
         # ALI
     def make_move(self, move: Piece, player: str) -> None:
