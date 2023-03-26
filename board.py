@@ -109,7 +109,7 @@ class Board:
     """A graph that represents a Connect 4 board and holds all empty and non-empty spaces/pieces.
 
     Instance Attributes:
-        - moves: all moves in the graph
+        - moves: a mapping of all pieces to their location.
         - player_moves: moves categroized with p1 and p2
         - width: width of the board
 
@@ -118,7 +118,7 @@ class Board:
         - all(type in {'P1', 'P2'} for type in self.player_moves)
         - 5 <= self.width <= 9
     """
-    moves: list[Piece]
+    _pieces: dict[tuple[int, int], Piece]
     player_moves: dict[str, list[Piece]]
     width: int
 
@@ -128,20 +128,35 @@ class Board:
         Preconditions:
             - 5 <= width <= 9
         """
-        #sukjeet
+        for i in range(width):
+            for j in range(width):
+                self._pieces[(i, j)] = Piece((i, j))
+        self.width = width
 
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
-        new_game.moves = self.moves
+        new_game._pieces = self._pieces
         new_game.player_moves = self.player_moves
         return new_game
 
     def first_player_turn(self) -> bool:
         """Return whether it is the first player turn."""
-    #sukjeet
+        if len(self.player_moves['P1']) == len(self.player_moves['P2']):
+            return True
+        else:
+            return False
+
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
+        possible_moves = set()
+        for j in range(self.width):
+            i = 0
+            while self._pieces[(i, j)].player is not None:
+                i += 1
+            possible_moves.add(self._pieces[(i, j)])
+        return possible_moves
+
 
         # aabha
     def get_winner(self) -> Optional[str]:
