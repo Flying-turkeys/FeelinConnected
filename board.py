@@ -153,13 +153,12 @@ class Board:
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
         possible_moves = set()
-        for x_cord in range(self.width):
-            possible_y = []
-            for y_cord in range(self.width):
-                if self._pieces[(x_cord, y_cord)].player is None:
-                    possible_y.append(y_cord)
-            if len(possible_y) > 0:
-                possible_moves.add(self._pieces[(x_cord, min(possible_y))])
+        for i in range(self.width):
+            j = 0
+            while j < self.width and self._pieces[(i, j)].player is not None:
+                j += 1
+            if j != self.width and self._pieces[(i, j)].player is None:
+                possible_moves.add(self._pieces[(i, j)])
         return possible_moves
 
     def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
@@ -178,27 +177,70 @@ class Board:
             all_paths.append(path)
         return all_paths
 
-    def get_winner(self) -> Optional[tuple[str, set[Piece]]]:
+    def get_winner_v2(self) -> Optional[tuple[str, set[Piece]]]:
         """Returns player and path of win if one of the players has a path of 4 connections
         (4 piecs) in the same direction.
         """
         directions = {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'}
-        connection_lengths = {}
+        connection_lengths = {"P1": [], "P2": []}
         for d in directions:
+
             paths_p1 = self.get_all_paths(d, "P1")
-            connection_lengths["P1"] = max(paths_p1, key=len)
+            print(paths_p1)
+        #     if paths_p1 is not None:
+        #         connection_lengths["P1"] = max(paths_p1, key=len)
+        #
+        #     paths_p2 = self.get_all_paths(d, "P2")
+        #     if paths_p2 is not None:
+        #         connection_lengths["P2"] = max(paths_p2, key=len)
+        #
+        # if len(connection_lengths["P1"]) >= 4:
+        #     return ("P1", connection_lengths["P1"])
+        # elif len(connection_lengths["P2"]) >= 4:
+        #     return ("P2", connection_lengths["P1"])
+        # elif all(self._pieces[key].player is not None for key in self._pieces):
+        #     return ("Tie", set())
+        # else:
+        #     return None
 
-            paths_p2 = self.get_all_paths(d, "P2")
-            connection_lengths["P2"] = max(paths_p2, key=len)
 
-        if len(connection_lengths["P1"]) >= 4:
-            return ("P1", connection_lengths["P1"])
-        elif len(connection_lengths["P2"]) >= 4:
-            return ("P2", connection_lengths["P1"])
-        elif all(self._pieces[key].player is not None for key in self._pieces):
-            return ("Tie", set())
-        else:
-            return None
+    def get_winner(self) -> Optional[str]:
+        """Returns corresponding player if one of the two have 3 connections
+        (4 piecs) in the same direction.
+        """
+        # Aabha
+        # TODO this function is getting a bit complicated because need to first count connections of each piece in all directions, check if there are 4 in a row of same direction then return that player as the winner
+
+        for player, moves in self.player_moves.items():
+            if self.four_in_row(moves):
+                return player
+        return None
+
+    def four_in_row(self, pieces: list[Piece]) -> bool:
+        """Return if there are any four connected pieces on the board"""
+        for piece in pieces:
+            for direction in piece.connections:
+                count = self.count_connected_pieces(piece, direction, set())
+                if count == 4:
+                    return True
+        return False
+
+    def count_connected_pieces(self, piece: Piece, direction: str, visited: set[Piece]) -> int:
+        """return the amount of connected pieces in given direction starting from given piece"""
+        if piece in visited:
+            return 0
+        visited.add(piece)
+        if direction not in piece.connections:
+            return 1
+        # gets next piece by searching current piece connections in the given direction, recursive?
+        next_pieces = [p.get_other_endpoint(piece) for p in piece.connections[direction]]
+
+        if next_pieces == []:
+            return 0
+        elif next_pieces[0] is None:
+            return 1
+        # test if this really works
+        return 1 + self.count_connected_pieces(next_pieces[0], direction, visited)
 
     def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> bool:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
