@@ -43,6 +43,10 @@ class Piece:
         """Updates the player of the piece"""
         self.player = player
 
+    def update_piece(self, player: str) -> None:
+        """Updates the player of the piece"""
+        self.player = player
+
     def __repr__(self) -> str:
         """Return a string representing this piece.
 
@@ -114,8 +118,8 @@ class Board:
         - all(type in {'P1', 'P2'} for type in self.player_moves)
         - 5 <= self.width <= 9
     """
-    moves: set[Piece]
-    player_moves: dict[str, set[Piece]]
+    moves: list[Piece]
+    player_moves: dict[str, list[Piece]]
     width: int
 
     def __init__(self, width: int) -> None:
@@ -126,7 +130,6 @@ class Board:
         """
         #sukjeet
 
-        ...
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
@@ -139,7 +142,6 @@ class Board:
     #sukjeet
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
-
 
         # aabha
     def get_winner(self) -> Optional[str]:
@@ -183,6 +185,13 @@ class Board:
             - move.location is a valid position to drop a piece (not a floating piece)
         """
         move.update_piece(player)
+
+        self.moves.append(move)
+        if self.player_moves[player]:
+            self.player_moves[player].append(move)
+        else:
+            self.player_moves[player] = [move]
+
         x_pos = move.location[0]
         y_pos = move.location[1]
         for piece in self.player_moves[player]:
