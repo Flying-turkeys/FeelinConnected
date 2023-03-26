@@ -152,10 +152,27 @@ class Board:
         possible_moves = set()
         for j in range(self.width):
             i = 0
-            while self._pieces[(i, j)].player is not None:
+            while self._pieces[(i, j)].player is not None and i < self.width:
                 i += 1
-            possible_moves.add(self._pieces[(i, j)])
+            if self._pieces[(i, j)].player is None:
+                possible_moves.add(self._pieces[(i, j)])
         return possible_moves
+
+    def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
+        pieces = self.player_moves[player]
+        all_paths = []
+        for piece in pieces:
+            path = set()
+            path.add(piece)
+            for connection in piece.connections[direction]:
+                next_piece = connection.get_other_endpoint(piece)
+                path.add(next_piece)
+                for connection1 in next_piece.connections[direction]:
+                    next_next_piece = connection1.get_other_endpoint(piece)
+                    path.add(next_next_piece)
+            all_paths.append(path)
+        return all_paths
+
 
 
         # aabha
