@@ -7,7 +7,7 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 
 from __future__ import annotations
 from typing import Optional
-from players import AbstractPlayer as Player
+# from players import AbstractPlayer as Player
 
 
 class Piece:
@@ -96,7 +96,7 @@ class Connection:
 class Board:
     """A graph that represents a Connect 4 board and holds all empty and non-empty spaces/pieces.
     Instance Attributes:
-        - moves: all moves in the graph
+        - moves: a mapping of all pieces to their location.
         - player_moves: moves categroized with p1 and p2
         - width: width of the board
     Representation Invariants:
@@ -104,7 +104,7 @@ class Board:
         - all(type in {'P1', 'P2'} for type in self.player_moves)
         - 5 <= self.width <= 9
     """
-    moves: list[Piece]
+    _pieces: dict[tuple[int, int], Piece]
     player_moves: dict[str, list[Piece]]
     width: int
 
@@ -113,27 +113,84 @@ class Board:
         Preconditions:
             - 5 <= width <= 9
         """
-        #sukjeet
+        self._pieces = {}
+        self.width = width
+        self.player_moves = {"P1": [], "P2": []}
+        for i in range(width):
+            for j in range(width):
+                location = (i, j)
+                new_piece = Piece(location)
+                self._pieces[location] = new_piece
 
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
-        new_game.moves = self.moves
+        new_game._pieces = self._pieces
         new_game.player_moves = self.player_moves
         return new_game
 
     def first_player_turn(self) -> bool:
         """Return whether it is the first player turn."""
-    #sukjeet
+        if len(self.player_moves['P1']) == len(self.player_moves['P2']):
+            return True
+        else:
+            return False
+
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
+        possible_moves = set()
+        for i in range(self.width):
+            j = 0
+            while j < self.width and self._pieces[(i, j)].player is not None:
+                j += 1
+            if j != self.width and self._pieces[(i, j)].player is None:
+                possible_moves.add(self._pieces[(i, j)])
+        return possible_moves
 
-        # aabha
-    def get_winner(self) -> Optional[str]:
-        """Returns corresponding player if one of the two have 3 connections
+    def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
+        """return all the paths that are in player's moves with a specific direction"""
+        pieces = self.player_moves[player]
+        all_paths = []
+        for piece in pieces:
+            path = set()
+            path.add(piece)
+            for connection in piece.connections[direction]:
+                next_piece = connection.get_other_endpoint(piece)
+                path.add(next_piece)
+                for connection1 in next_piece.connections[direction]:
+                    next_next_piece = connection1.get_other_endpoint(piece)
+                    path.add(next_next_piece)
+            all_paths.append(path)
+        return all_paths
+
+    def get_winner_v2(self) -> Optional[tuple[str, set[Piece]]]:
+        """Returns player and path of win if one of the players has a path of 4 connections
         (4 piecs) in the same direction.
         """
-        #Aabha
+        directions = {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'}
+        connection_lengths = {"P1": [], "P2": []}
+        for d in directions:
+            paths_p1 = self.get_all_paths(d, "P1")
+            if paths_p1:
+                connection_lengths["P1"].append(max(paths_p1, key=len))
+
+            paths_p2 = self.get_all_paths(d, "P2")
+            if paths_p2:
+                connection_lengths["P2"].append(max(paths_p2, key=len))
+        if connection_lengths['P1']:
+            connection_lengths['P1'] = max(connection_lengths['P1'], key=len)
+        if connection_lengths['P2']:
+            connection_lengths['P2'] = max(connection_lengths['P2'], key=len)
+
+        if len(connection_lengths["P1"]) >= 4:
+            return ("P1", connection_lengths["P1"])
+        elif len(connection_lengths["P2"]) >= 4:
+            return ("P2", connection_lengths["P1"])
+        elif all(self._pieces[key].player is not None for key in self._pieces):
+            return ("Tie", set())
+        else:
+            return None
+
     def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> bool:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
         of their connection. Returns whether the connecton was added successfully.
@@ -151,15 +208,26 @@ class Board:
             return True
 
         #ALI
-    def get_connection_direction(self, n1: Piece, n2: Piece) -> str:
+
+    def get_connection_direction(self, n1: Piece, n2: Piece) -> Optional[str]:
         """Returns direction of connection between the two pieces.
-        raises a ValueError if there is not an existing connection between the pieces.
+        returns none if no connection exists.
         """
-        # TODO: figure out when this is used?
-        location1 = n1.location
-        location2 = n2.location
+        x_pos = n2.location[0]
+        y_pos = n2.location[1]
+        if n1.location in {(x_pos + 1, y_pos + 1), (x_pos - 1, y_pos - 1)}:
+            return 'right-diagonal'
+        elif n1.location in {(x_pos + 1, y_pos), (x_pos - 1, y_pos)}:
+            return 'vertical'
+        elif n1.location in {(x_pos, y_pos + 1), (x_pos, y_pos - 1)}:
+            return 'horizontal'
+        elif n1.location in {(x_pos + 1, y_pos - 1), (x_pos - 1, y_pos + 1)}:
+            return 'left-diagonal'
+        else:
+            return None
 
         # ALI
+
     def make_move(self, move: Piece, player: str) -> None:
         """Assigns Piece to player and adds it to the board’s corresponding
         player moves attribute. Also updates any connections this move may make.
@@ -168,24 +236,15 @@ class Board:
             - move.location is a valid position to drop a piece (not a floating piece)
         """
         move.update_piece(player)
-
-        self.moves.append(move)
         if self.player_moves[player]:
             self.player_moves[player].append(move)
         else:
             self.player_moves[player] = [move]
 
-        x_pos = move.location[0]
-        y_pos = move.location[1]
         for piece in self.player_moves[player]:
-            if piece.location in {(x_pos + 1, y_pos + 1), (x_pos - 1, y_pos - 1)}:
-                self.add_connection(move, piece, 'right-diagonal')
-            elif piece.location in {(x_pos + 1, y_pos), (x_pos - 1, y_pos)}:
-                self.add_connection(move, piece, 'vertical')
-            elif piece.location in {(x_pos, y_pos + 1), (x_pos, y_pos - 1)}:
-                self.add_connection(move, piece, 'horizontal')
-            elif piece.location in {(x_pos + 1, y_pos - 1), (x_pos - 1, y_pos + 1)}:
-                self.add_connection(move, piece, 'left-diagonal')
+            connection_direction = self.get_connection_direction(piece, move)
+            if connection_direction:
+                self.add_connection(move, piece, connection_direction)
 
     def copy_and_record_move(self, move: Piece, player: str) -> Board:
         """Return a copy of this game state with the given status recorded.
