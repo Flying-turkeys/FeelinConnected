@@ -1,9 +1,7 @@
 """CSC111 Winter 2023 Final Project: Feelin Connected
-
 File Information
 ===============================
 This file contains the data classes that will compose the graph used to create the Connect 4 game.
-
 This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
 """
 
@@ -14,7 +12,6 @@ from players import AbstractPlayer as Player
 
 class Piece:
     """A node that represents a piece in a Connect 4 board.
-
     Instance Attributes
         - player:
             The player who this piece belongs to. Can be None if no player has
@@ -22,8 +19,7 @@ class Piece:
         - location:
             The address (i.e., unique identifier) of this node.
         - connections:
-            A dictionary mapping the type of connection to a connection.
-
+            A dictionary mapping the location of connection to a connection.
     Representation Invariants:
         - all(key in {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'} for key in self.connections)
         - all(point >= 0 for point in self.location)
@@ -31,13 +27,17 @@ class Piece:
     """
     player: Optional[str]
     location: tuple[int, int]
-    connections: dict[str, Connection]
+    connections: dict[str, list[Connection]]
 
     def __init__(self, location: tuple[int, int]) -> None:
         """Initialize this piece with the given location and no connections to other pieces."""
         self.player = None
         self.location = location
-        self.connections = {}
+        self.connections = {'vertical': [], 'horizontal': [], 'right-diagonal': [], 'left-diagonal': []}
+
+    def update_piece(self, player: str) -> None:
+        """Updates the player of the piece"""
+        self.player = player
 
     def update_piece(self, player: str) -> None:
         """Updates the player of the piece"""
@@ -45,7 +45,6 @@ class Piece:
 
     def __repr__(self) -> str:
         """Return a string representing this piece.
-
         >>> piece = Piece((0, 0))
         >>> piece
         Piece(0, 0)
@@ -55,11 +54,9 @@ class Piece:
 
 class Connection:
     """A link (or "edge") connecting two pieces on a Connect 4 board.
-
     Instance Attributes:
         - type: The direction (type) of connection two pieces make.
         - endpoints: The two pieces that are linked by this connection.
-
     Representation Invariants:
         - len(self.endpoints) == 2
         - self.type in {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'}
@@ -69,36 +66,18 @@ class Connection:
 
     def __init__(self, n1: Piece, n2: Piece, direction: str) -> None:
         """Initialize an empty connection with the two given pieces.
-
         Also add this connection to n1 and n2.
-
         Raise ValueError if the connection is not valid. That is, the pieces are not adjacent in any way.
-
         Preconditions:
             - n1 != n2
             - n1 and n2 are not already connected by a connection
             - n1 and n2 make a valid connection on the board
         """
-        location1 = n1.location
-        location2 = n2.location
-        if location2 in {(location1[0] + 1, location1[0] + 1), (location1[0] - 1, location1[0] - 1)}:
-            self.type = 'right-diagonal'
-            self.endpoints = {n1, n2}
-        elif location2 in {(location1[0] + 1, location1[0]), (location1[0] - 1, location1[0])}:
-            self.type = 'vertical'
-            self.endpoints = {n1, n2}
-        elif location2 in {(location1[0], location1[0] + 1), (location1[0], location1[0] - 1)}:
-            self.type = 'horizontal'
-            self.endpoints = {n1, n2}
-        elif location2 in {(location1[0] + 1, location1[0] - 1), (location1[0] - 1, location1[0] + 1)}:
-            self.type = 'left-diagonal'
-            self.endpoints = {n1, n2}
-        else:
-            raise ValueError
+        self.type = direction
+        self.endpoints = {n1, n2}
 
     def get_other_endpoint(self, piece: Piece) -> Piece:
         """Return the endpoint of this connection that is not equal to the given piece.
-
         Preconditions:
             - piece in self.endpoints
         """
@@ -106,7 +85,6 @@ class Connection:
 
     def __repr__(self) -> str:
         """Return a string representing this connection.
-
         >>> connection = Connection(Piece((0, 0)), Piece((0, 1)))
         >>> repr(connection) in {'Connection(Piece(0, 0), Piece(0, 1))', 'Connection(Piece(0, 1), Piece(0, 0))'}
         True
@@ -117,12 +95,10 @@ class Connection:
 
 class Board:
     """A graph that represents a Connect 4 board and holds all empty and non-empty spaces/pieces.
-
     Instance Attributes:
         - moves: all moves in the graph
         - player_moves: moves categroized with p1 and p2
         - width: width of the board
-
     Representation Invariants:
         - len(self.player_moves) == 2
         - all(type in {'P1', 'P2'} for type in self.player_moves)
@@ -134,10 +110,10 @@ class Board:
 
     def __init__(self, width: int) -> None:
         """Initialize this board with the dimensions of width by width.
-
         Preconditions:
             - 5 <= width <= 9
         """
+        #sukjeet
 
     def _copy(self) -> Board:
         """Return a copy of this game state."""
@@ -148,36 +124,45 @@ class Board:
 
     def first_player_turn(self) -> bool:
         """Return whether it is the first player turn."""
-        print()
-
-
+    #sukjeet
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves as vertices"""
+
         # aabha
     def get_winner(self) -> Optional[str]:
         """Returns corresponding player if one of the two have 3 connections
         (4 piecs) in the same direction.
         """
         #Aabha
-    def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> Connection:
+    def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> bool:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
-        of their connection. Returns the new connection.
-        # TODO: Maybe we don't need to return connection but added it any way just in case (can change later)
-
+        of their connection. Returns whether the connecton was added successfully.
          Preconditions:
             - n1.player is not None and n2.player is not None
             - n1.player == n2.player
             - n1 and n2 make a valid connection on the board
          """
+        connection = Connection(n1, n2, connection_type)
+        if connection in n1.connections[connection_type]:
+            return False
+        else:
+            n1.connections[connection_type].append(connection)
+            n2.connections[connection_type].append(connection)
+            return True
+
         #ALI
     def get_connection_direction(self, n1: Piece, n2: Piece) -> str:
-        """Returns direction of connection between the two pieces"""
+        """Returns direction of connection between the two pieces.
+        raises a ValueError if there is not an existing connection between the pieces.
+        """
+        # TODO: figure out when this is used?
+        location1 = n1.location
+        location2 = n2.location
 
         # ALI
     def make_move(self, move: Piece, player: str) -> None:
         """Assigns Piece to player and adds it to the board’s corresponding
         player moves attribute. Also updates any connections this move may make.
-
         Preconditions:
             - move.player is None
             - move.location is a valid position to drop a piece (not a floating piece)
@@ -204,7 +189,6 @@ class Board:
 
     def copy_and_record_move(self, move: Piece, player: str) -> Board:
         """Return a copy of this game state with the given status recorded.
-
         Preconditions:
         - not self.is_guesser_turn()
         - len(status) == self.word_size
