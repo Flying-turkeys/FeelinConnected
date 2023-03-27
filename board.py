@@ -271,8 +271,9 @@ class Board:
 
     def _copy(self) -> Board:
         """Return a copy of this game state."""
-        new_game = Board(self.width, self._pieces)
-        new_game.player_moves = self.player_moves
+        new_game = Board(self.width)
+        new_game._pieces = self._pieces.copy()
+        new_game.player_moves = self.player_moves.copy()
         return new_game
 
     def board_to_tabular(self) -> list[list[int]]:
