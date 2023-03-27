@@ -34,7 +34,8 @@ def generate_game_tree(root_move: Piece, game_state: Board, d: int) -> gt.GameTr
     """
     game_tree = gt.GameTree(root_move)
     possibles = game_state.possible_moves()
-
+    if root_move in possibles:
+        possibles.remove(root_move)
     if d == 0:
         if game_state.get_winner() is not None:
             if game_state.get_winner()[0] == 'P1':
@@ -43,14 +44,10 @@ def generate_game_tree(root_move: Piece, game_state: Board, d: int) -> gt.GameTr
                 game_tree.player_winning_probability['P2'] = 1.0
         return game_tree
     elif game_state.first_player_turn():
-        if root_move in possibles:
-            possibles.remove(root_move)
         for move in possibles:
             new_state = game_state.copy_and_record_move(move, 'P1')
             game_tree.add_subtree(generate_game_tree(move, new_state, d - 1))
     else:
-        if root_move in possibles:
-            possibles.remove(root_move)
         for move in possibles:
             new_state = game_state.copy_and_record_move(move, 'P2')
             game_tree.add_subtree((generate_game_tree(move, new_state, d - 1)))

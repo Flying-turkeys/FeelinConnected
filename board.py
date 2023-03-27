@@ -106,19 +106,22 @@ class Board:
     player_moves: dict[str, list[Piece]]
     width: int
 
-    def __init__(self, width: int) -> None:
+    def __init__(self, width: int, pieces: dict[tuple[int, int], Piece] = None) -> None:
         """Initialize this board with the dimensions of width by width.
         Preconditions:
             - 5 <= width <= 9
         """
-        self._pieces = {}
         self.width = width
         self.player_moves = {"P1": [], "P2": []}
-        for i in range(width):
-            for j in range(width):
-                location = (i, j)
-                new_piece = Piece(location)
-                self._pieces[location] = new_piece
+        if pieces is None:
+            self._pieces = {}
+            for i in range(width):
+                for j in range(width):
+                    location = (i, j)
+                    new_piece = Piece(location)
+                    self._pieces[location] = new_piece
+        else:
+            self._pieces = pieces
 
     ####################################################################
     # Game functions
@@ -268,8 +271,7 @@ class Board:
 
     def _copy(self) -> Board:
         """Return a copy of this game state."""
-        new_game = Board(self.width)
-        new_game.moves = self._pieces
+        new_game = Board(self.width, self._pieces)
         new_game.player_moves = self.player_moves
         return new_game
 
