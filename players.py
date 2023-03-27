@@ -14,7 +14,7 @@ import copy
 import random
 
 
-def generate_game_tree(root_move: Piece, game_state: Board, d: int) -> gt.GameTree:
+def generate_game_tree(root_move: str | Piece, game_state: Board, d: int) -> gt.GameTree:
     """Generate a complete game tree of depth d for all valid moves from the current game_state.
 
     For the returned GameTree:
@@ -44,10 +44,14 @@ def generate_game_tree(root_move: Piece, game_state: Board, d: int) -> gt.GameTr
                 game_tree.player_winning_probability['P2'] = 1.0
         return game_tree
     elif game_state.first_player_turn():
+        if root_move in possibles:
+            possibles.remove(root_move)
         for move in possibles:
             new_state = game_state.copy_and_record_move(move, 'P1')
             game_tree.add_subtree(generate_game_tree(move, new_state, d - 1))
     else:
+        if root_move in possibles:
+            possibles.remove(root_move)
         for move in possibles:
             new_state = game_state.copy_and_record_move(move, 'P2')
             game_tree.add_subtree((generate_game_tree(move, new_state, d - 1)))

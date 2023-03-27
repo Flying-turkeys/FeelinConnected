@@ -6,6 +6,8 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 """
 
 from __future__ import annotations
+
+import copy
 from typing import Optional
 
 
@@ -113,15 +115,15 @@ class Board:
         """
         self.width = width
         self.player_moves = {"P1": [], "P2": []}
+        self._pieces = {}
         if pieces is None:
-            self._pieces = {}
             for i in range(width):
                 for j in range(width):
                     location = (i, j)
                     new_piece = Piece(location)
                     self._pieces[location] = new_piece
         else:
-            self._pieces = pieces
+            self._pieces.update(pieces)
 
     ####################################################################
     # Game functions
@@ -134,6 +136,7 @@ class Board:
             - move.location is a valid position to drop a piece (not a floating piece)
         """
         move.update_piece(player)
+        self._pieces[move.location].player = player
         if self.player_moves[player]:
             self.player_moves[player].append(move)
         else:
@@ -266,14 +269,14 @@ class Board:
     def copy_and_record_move(self, move: Piece, player: str) -> Board:
         """Return a copy of this game state with the given move."""
         new_game = self._copy()
-        new_game.make_move(move, player)
+        new_game.make_move(new_game._pieces[move.location], player)
         return new_game
 
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
-        new_game._pieces = self._pieces.copy()
-        new_game.player_moves = self.player_moves.copy()
+        new_game._pieces = copy.deepcopy(self._pieces)
+        new_game.player_moves = copy.deepcopy(self.player_moves)
         return new_game
 
     def board_to_tabular(self) -> list[list[int]]:
