@@ -49,9 +49,8 @@ class GameTree:
         True
         """
         self.move = move
+        self.player_winning_probability = {'P1': p1_win_prob, 'P2': p2_win_prob}
         self._subtrees = {}
-        self.player_winning_probability['P1'] = p1_win_prob
-        self.player_winning_probability['P2'] = p2_win_prob
 
     def get_subtrees(self) -> list[GameTree]:
         """Return the subtrees of this game tree."""

@@ -175,6 +175,21 @@ class Board:
             n2.connections[connection_type].append(connection)
             return True
 
+    def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
+        """Gets all paths of piece for a given player in a specific direction"""
+        pieces = self.player_moves[player]
+        all_paths = []
+        for piece in pieces:
+            path = {piece}
+            for connection in piece.connections[direction]:
+                next_piece = connection.get_other_endpoint(piece)
+                path.add(next_piece)
+                for connection1 in next_piece.connections[direction]:
+                    next_next_piece = connection1.get_other_endpoint(piece)
+                    path.add(next_next_piece)
+            all_paths.append(path)
+        return all_paths
+
     def get_winner(self) -> Optional[tuple[str, set[Piece]]]:
         """Returns player and path of win if one of the players has a path of 4 connections
         (4 piecs) in the same direction.
@@ -198,21 +213,6 @@ class Board:
             return ("Tie", set())
         else:
             return None
-
-    def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
-        """Gets all paths of piece for a given player in a specific direction"""
-        pieces = self.player_moves[player]
-        all_paths = []
-        for piece in pieces:
-            path = {piece}
-            for connection in piece.connections[direction]:
-                next_piece = connection.get_other_endpoint(piece)
-                path.add(next_piece)
-                for connection1 in next_piece.connections[direction]:
-                    next_next_piece = connection1.get_other_endpoint(piece)
-                    path.add(next_next_piece)
-            all_paths.append(path)
-        return all_paths
 
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves on the current board state"""
