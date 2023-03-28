@@ -6,6 +6,8 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 """
 
 from __future__ import annotations
+
+import copy
 from typing import Optional
 
 
@@ -106,19 +108,22 @@ class Board:
     player_moves: dict[str, list[Piece]]
     width: int
 
-    def __init__(self, width: int) -> None:
+    def __init__(self, width: int, pieces: dict[tuple[int, int], Piece] = None) -> None:
         """Initialize this board with the dimensions of width by width.
         Preconditions:
             - 5 <= width <= 9
         """
-        self._pieces = {}
         self.width = width
         self.player_moves = {"P1": [], "P2": []}
-        for i in range(width):
-            for j in range(width):
-                location = (i, j)
-                new_piece = Piece(location)
-                self._pieces[location] = new_piece
+        self._pieces = {}
+        if pieces is None:
+            for i in range(width):
+                for j in range(width):
+                    location = (i, j)
+                    new_piece = Piece(location)
+                    self._pieces[location] = new_piece
+        else:
+            self._pieces.update(pieces)
 
     ####################################################################
     # Game functions
@@ -131,6 +136,7 @@ class Board:
             - move.location is a valid position to drop a piece (not a floating piece)
         """
         move.update_piece(player)
+        self._pieces[move.location].player = player
         if self.player_moves[player]:
             self.player_moves[player].append(move)
         else:
@@ -175,6 +181,21 @@ class Board:
             n2.connections[connection_type].append(connection)
             return True
 
+    def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
+        """Gets all paths of piece for a given player in a specific direction"""
+        pieces = self.player_moves[player]
+        all_paths = []
+        for piece in pieces:
+            path = {piece}
+            for connection in piece.connections[direction]:
+                next_piece = connection.get_other_endpoint(piece)
+                path.add(next_piece)
+                for connection1 in next_piece.connections[direction]:
+                    next_next_piece = connection1.get_other_endpoint(piece)
+                    path.add(next_next_piece)
+            all_paths.append(path)
+        return all_paths
+
     def get_winner(self) -> Optional[tuple[str, set[Piece]]]:
         """Returns player and path of win if one of the players has a path of 4 connections
         (4 piecs) in the same direction.
@@ -198,21 +219,6 @@ class Board:
             return ("Tie", set())
         else:
             return None
-
-    def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
-        """Gets all paths of piece for a given player in a specific direction"""
-        pieces = self.player_moves[player]
-        all_paths = []
-        for piece in pieces:
-            path = {piece}
-            for connection in piece.connections[direction]:
-                next_piece = connection.get_other_endpoint(piece)
-                path.add(next_piece)
-                for connection1 in next_piece.connections[direction]:
-                    next_next_piece = connection1.get_other_endpoint(piece)
-                    path.add(next_next_piece)
-            all_paths.append(path)
-        return all_paths
 
     def possible_moves(self) -> set[Piece]:
         """Returns a set of possible moves on the current board state"""
@@ -262,14 +268,14 @@ class Board:
     def copy_and_record_move(self, move: Piece, player: str) -> Board:
         """Return a copy of this game state with the given move."""
         new_game = self._copy()
-        new_game.make_move(move, player)
+        new_game.make_move(new_game._pieces[move.location], player)
         return new_game
 
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
-        new_game.moves = self._pieces
-        new_game.player_moves = self.player_moves
+        new_game._pieces = copy.deepcopy(self._pieces)
+        new_game.player_moves = copy.deepcopy(self.player_moves)
         return new_game
 
     def board_to_tabular(self) -> list[list[int]]:
