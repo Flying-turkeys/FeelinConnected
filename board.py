@@ -240,6 +240,14 @@ class Board:
     ####################################################################
     # AI helper functions
     ####################################################################
+    def copy_and_record_move(self, move_location: tuple[int, int], player: str) -> Board:
+        """Return a copy of this game state with the given move."""
+        new_game = Board(self.width)
+        new_game.player_moves = copy.deepcopy(self.player_moves)
+        new_game._pieces = copy.deepcopy(self._pieces)
+        new_game.make_move(new_game._pieces[move_location], player)
+        return new_game
+
     def four_in_row(self, pieces: list[Piece]) -> bool:
         """Return if there are any four connected pieces on the board"""
         for piece in pieces:
@@ -264,6 +272,7 @@ class Board:
         elif next_pieces[0] is None:
             return 1
         return 1 + self.count_connected_pieces(next_pieces[0], direction, visited)
+
 
     def copy_and_record_move(self, move: Piece, player: str) -> Board:
         """Return a copy of this game state with the given move."""

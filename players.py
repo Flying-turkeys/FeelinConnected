@@ -1,28 +1,24 @@
 """CSC111 Winter 2023 Final Project: Feelin Connected
-
 File Information
 ===============================
 This file contains the data classes that will compose the AI used to create the Connect 4 game.
-
 This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
 """
 from typing import Optional
 from board import Board
 from board import Piece
 import game_tree as gt
-import copy
 import random
 
 
-def generate_game_tree(root_move: str | Piece, game_state: Board, d: int) -> gt.GameTree:
+def generate_game_tree(root_move: Piece | str, game_state: Board, d: int) -> gt.GameTree:
     """Generate a complete game tree of depth d for all valid moves from the current game_state.
 
     For the returned GameTree:
         - Its root move is root_move.
         - It contains all possible move sequences of length <= d from game_state.
         - If d == 0, a size-one GameTree is returned.
-
-
+        
     Preconditions:
         - d >= 0
         - root_move == a2_game_tree.GAME_START_MOVE or root_move is a valid move
@@ -44,17 +40,13 @@ def generate_game_tree(root_move: str | Piece, game_state: Board, d: int) -> gt.
                 game_tree.player_winning_probability['P2'] = 1.0
         return game_tree
     elif game_state.first_player_turn():
-        if root_move in possibles:
-            possibles.remove(root_move)
         for move in possibles:
-            new_state = game_state.copy_and_record_move(move, 'P1')
-            game_tree.add_subtree(generate_game_tree(move, new_state, d - 1))
+            new_state = game_state.copy_and_record_move(move.location, 'P1')
+            game_tree.add_subtree(generate_game_tree(new_state._pieces[move.location], new_state, d - 1))
     else:
-        if root_move in possibles:
-            possibles.remove(root_move)
         for move in possibles:
-            new_state = game_state.copy_and_record_move(move, 'P2')
-            game_tree.add_subtree((generate_game_tree(move, new_state, d - 1)))
+            new_state = game_state.copy_and_record_move(move.location, 'P2')
+            game_tree.add_subtree((generate_game_tree(new_state._pieces[move.location], new_state, d - 1)))
     return game_tree
 
 
