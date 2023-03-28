@@ -8,8 +8,7 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 """
 from __future__ import annotations
 from typing import Optional
-from board import Piece
-
+from board import Board, Piece
 GAME_START_MOVE = '*'
 
 
@@ -25,7 +24,6 @@ class GameTree:
         - 0.0 <= self.guesser_win_probability <= 1.0
     """
     move: Piece | str
-    turn: str
     player_winning_probability: dict[str, float]
     _subtrees: dict[Piece, GameTree]
 
@@ -33,10 +31,12 @@ class GameTree:
     #  - _subtrees:
     #      the subtrees of this tree, which represent the game trees after a possible
     #      move by the current player.
+    
     def __init__(self, move: Piece | str = GAME_START_MOVE,
                  p1_win_prob: float = 0.0, p2_win_prob: float = 0.0) -> None:
         """Initialize a new game tree.
         Note that this initializer uses optional arguments.
+
         >>> game = GameTree()
         >>> game.move == GAME_START_MOVE
         True
@@ -57,6 +57,10 @@ class GameTree:
             return self._subtrees[move]
         else:
             return None
+
+    def first_player_turn(self) -> bool:
+        """Return whether the NEXT move should be made by first player (P1)."""
+        return self.move == GAME_START_MOVE or self.move.player == 'P2'
 
     def __str__(self) -> str:
         """Return a string representation of this tree.

@@ -13,10 +13,12 @@ import random
 
 def generate_game_tree(root_move: Piece | str, game_state: Board, d: int) -> gt.GameTree:
     """Generate a complete game tree of depth d for all valid moves from the current game_state.
+
     For the returned GameTree:
         - Its root move is root_move.
         - It contains all possible move sequences of length <= d from game_state.
         - If d == 0, a size-one GameTree is returned.
+        
     Preconditions:
         - d >= 0
         - root_move == a2_game_tree.GAME_START_MOVE or root_move is a valid move
@@ -30,7 +32,6 @@ def generate_game_tree(root_move: Piece | str, game_state: Board, d: int) -> gt.
     possibles = game_state.possible_moves()
     if root_move in possibles:
         possibles.remove(root_move)
-
     if d == 0:
         if game_state.get_winner() is not None:
             if game_state.get_winner()[0] == 'P1':

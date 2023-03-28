@@ -2,6 +2,8 @@
 File Information
 ===============================
 This file contains graphical user interface for the game board
+
+
 This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
 """
 import pygame, numpy
