@@ -31,7 +31,6 @@ class GameTree:
     #  - _subtrees:
     #      the subtrees of this tree, which represent the game trees after a possible
     #      move by the current player.
-    
     def __init__(self, move: Piece | str = GAME_START_MOVE,
                  p1_win_prob: float = 0.0, p2_win_prob: float = 0.0) -> None:
         """Initialize a new game tree.
@@ -53,7 +52,7 @@ class GameTree:
         """Return the subtree corresponding to the given move.
         Return None if no subtree corresponds to that move.
         """
-        if move.location in self._subtrees:
+        if move in self._subtrees:
             return self._subtrees[move]
         else:
             return None
@@ -88,6 +87,18 @@ class GameTree:
     def add_subtree(self, subtree: GameTree) -> None:
         """Add a subtree to this game tree."""
         self._subtrees[subtree.move] = subtree
+        self._update_player_win_probability()
+
+    def _update_player_win_probability(self) -> None:
+        """Recalculate the player win probability of this tree.
+        """
+        if self._subtrees == {}:
+            return
+        self.player_winning_probability['P1'] = max(subtree.player_winning_probability['P1']
+                                                    for subtree in self.get_subtrees()) / 2
+
+        self.player_winning_probability['P2'] = max(subtree.player_winning_probability['P2']
+                                                    for subtree in self.get_subtrees()) / 2
 
 
 if __name__ == '__main__':

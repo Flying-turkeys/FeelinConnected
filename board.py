@@ -104,7 +104,7 @@ class Board:
         - all(key in {'P1', 'P2'} for key in self.player_moves)
         - 5 <= self.width <= 9
     """
-    _pieces: dict[tuple[int, int], Piece]
+    pieces: dict[tuple[int, int], Piece]
     player_moves: dict[str, list[Piece]]
     width: int
 
@@ -115,15 +115,15 @@ class Board:
         """
         self.width = width
         self.player_moves = {"P1": [], "P2": []}
-        self._pieces = {}
+        self.pieces = {}
         if pieces is None:
             for i in range(width):
                 for j in range(width):
                     location = (i, j)
                     new_piece = Piece(location)
-                    self._pieces[location] = new_piece
+                    self.pieces[location] = new_piece
         else:
-            self._pieces.update(pieces)
+            self.pieces.update(pieces)
 
     ####################################################################
     # Game functions
@@ -136,7 +136,7 @@ class Board:
             - move.location is a valid position to drop a piece (not a floating piece)
         """
         move.update_piece(player)
-        self._pieces[move.location].player = player
+        self.pieces[move.location].player = player
         if self.player_moves[player]:
             self.player_moves[player].append(move)
         else:
@@ -215,7 +215,7 @@ class Board:
             return ("P1", p1_max_connect)
         elif len(p2_max_connect) >= 4:
             return ("P2", p2_max_connect)
-        elif all(self._pieces[key].player is not None for key in self._pieces):
+        elif all(self.pieces[key].player is not None for key in self.pieces):
             return ("Tie", set())
         else:
             return None
@@ -225,10 +225,10 @@ class Board:
         possible_moves = set()
         for i in range(self.width):
             j = 0
-            while j < self.width and self._pieces[(i, j)].player is not None:
+            while j < self.width and self.pieces[(i, j)].player is not None:
                 j += 1
-            if j != self.width and self._pieces[(i, j)].player is None:
-                possible_moves.add(self._pieces[(i, j)])
+            if j != self.width and self.pieces[(i, j)].player is None:
+                possible_moves.add(self.pieces[(i, j)])
         return possible_moves
 
     def first_player_turn(self) -> bool:
@@ -244,8 +244,8 @@ class Board:
         """Return a copy of this game state with the given move."""
         new_game = Board(self.width)
         new_game.player_moves = copy.deepcopy(self.player_moves)
-        new_game._pieces = copy.deepcopy(self._pieces)
-        new_game.make_move(new_game._pieces[move_location], player)
+        new_game.pieces = copy.deepcopy(self.pieces)
+        new_game.make_move(new_game.pieces[move_location], player)
         return new_game
 
     def four_in_row(self, pieces: list[Piece]) -> bool:
@@ -273,17 +273,10 @@ class Board:
             return 1
         return 1 + self.count_connected_pieces(next_pieces[0], direction, visited)
 
-
-    def copy_and_record_move(self, move: Piece, player: str) -> Board:
-        """Return a copy of this game state with the given move."""
-        new_game = self._copy()
-        new_game.make_move(new_game._pieces[move.location], player)
-        return new_game
-
     def _copy(self) -> Board:
         """Return a copy of this game state."""
         new_game = Board(self.width)
-        new_game._pieces = copy.deepcopy(self._pieces)
+        new_game.pieces = copy.deepcopy(self.pieces)
         new_game.player_moves = copy.deepcopy(self.player_moves)
         return new_game
 
@@ -293,7 +286,7 @@ class Board:
         for j in range(self.width):
             row = []
             for i in range(self.width):
-                piece = self._pieces[(i, j)]
+                piece = self.pieces[(i, j)]
                 if piece.player == "P1":
                     identifier = 1
                 elif piece.player == "P2":
