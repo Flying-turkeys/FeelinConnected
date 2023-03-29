@@ -248,6 +248,21 @@ class Board:
         new_game.make_move(new_game._pieces[move_location], player)
         return new_game
 
+    def get_move_sequence(self) -> list[Piece]:
+        """Return the move sequence made in this game.
+
+        The returned list alternates between guesses (str) and statuses (tuple[str, ...]):
+
+            [self.guesses[0], self.statuses[0], self.guesses[1], self.statuses[1], ...]
+        """
+        moves_so_far = []
+        for i in range(0, len(self.player_moves["P1"])):
+            moves_so_far.append(self.player_moves["P1"][i])
+            if i < len(self.player_moves["P2"]):  # self.statuses may be 1 shorter than self.guesses
+                moves_so_far.append(self.player_moves["P2"][i])
+
+        return moves_so_far
+
     def four_in_row(self, pieces: list[Piece]) -> bool:
         """Return if there are any four connected pieces on the board"""
         for piece in pieces:
@@ -272,20 +287,6 @@ class Board:
         elif next_pieces[0] is None:
             return 1
         return 1 + self.count_connected_pieces(next_pieces[0], direction, visited)
-
-
-    def copy_and_record_move(self, move: Piece, player: str) -> Board:
-        """Return a copy of this game state with the given move."""
-        new_game = self._copy()
-        new_game.make_move(new_game._pieces[move.location], player)
-        return new_game
-
-    def _copy(self) -> Board:
-        """Return a copy of this game state."""
-        new_game = Board(self.width)
-        new_game._pieces = copy.deepcopy(self._pieces)
-        new_game.player_moves = copy.deepcopy(self.player_moves)
-        return new_game
 
     def board_to_tabular(self) -> list[list[int]]:
         """Returns the boards state in tabular data"""

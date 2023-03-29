@@ -18,7 +18,7 @@ def generate_game_tree(root_move: Piece | str, game_state: Board, d: int) -> gt.
         - Its root move is root_move.
         - It contains all possible move sequences of length <= d from game_state.
         - If d == 0, a size-one GameTree is returned.
-        
+
     Preconditions:
         - d >= 0
         - root_move == a2_game_tree.GAME_START_MOVE or root_move is a valid move
@@ -72,6 +72,11 @@ class Person(AbstractPlayer):
 
     def make_move(self, board: Board) -> Piece:
         """Abstract method for a player making a move on the board"""
+        possible_moves = board.possible_moves()
+        column = int(input("Column: "))
+        for move in possible_moves:
+            if move.location[0] == column:
+                return move
 
 
 class RandomPlayer(AbstractPlayer):
@@ -90,13 +95,32 @@ class GreedyPlayer(AbstractPlayer):
     #       The GameTree that this player uses to make its moves. If None, then this
     #       player behaves like aw.RandomGuesser.
     _game_tree: Optional[gt.GameTree]
+    _exploration_probability: float
 
-    def __init__(self, tree: Optional[gt.GameTree]) -> None:
+    def __init__(self, tree: Optional[gt.GameTree], exploration_probability: float = 0.0) -> None:
         """Abstract method for initializing this player"""
         self._game_tree = tree
+        self._exploration_probability = exploration_probability
 
     def make_move(self, board: Board) -> Piece:
         """Abstract method for a player making a move on the board"""
+
+        # possible_moves = board.possible_moves()
+        # random_move = random.choice(list(possible_moves))
+        #
+        # if self._game_tree is not None:
+        #     if len(board.player_moves["P2"]) > 0:
+        #         self._game_tree = self._game_tree.find_subtree_by_move(board.player_moves["P2"][-1])
+        #     if not (self._game_tree is None or self._game_tree.get_subtrees() == []):
+        #         random_float = random.random()
+        #         if random_float < self._exploration_probability:
+        #             self._game_tree = self._game_tree.find_subtree_by_move(random_move)
+        #             return random_move
+        #         else:
+        #             sub = max(self._game_tree.get_subtrees(), key=lambda subtree: subtree.player_winning_probability["P2"])
+        #             self._game_tree = sub
+        #             return sub.move
+        # return random_move
 
 
 if __name__ == '__main__':

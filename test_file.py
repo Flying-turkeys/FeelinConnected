@@ -15,14 +15,12 @@ def test_copy():
     b = c.board_to_tabular()
     for i in range(len(b)):
         print(b[len(b) - i - 1])
-    print(c.player_moves)
 
     k = c.copy_and_record_move((1, 0), "P2")
     print("--------------")
     b = k.board_to_tabular()
     for i in range(len(b)):
         print(b[len(b) - i - 1])
-    print(k.player_moves)
 
     print("--------------")
     original = bd.board_to_tabular()
