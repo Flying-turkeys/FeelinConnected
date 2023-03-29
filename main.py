@@ -13,11 +13,13 @@ if __name__ == '__main__':
     bd = Board(4)
     p1 = Person()
     tree = generate_game_tree("*", bd, 7)
-    p2 = GreedyPlayer(tree, 0)
     print("START")
     for i in range(len(bd.board_to_tabular())):
         print(bd.board_to_tabular()[len(bd.board_to_tabular()) - i - 1])
+
+    count = 0
     while bd.get_winner() is None:
+        p2 = GreedyPlayer(tree, "P2")
         move1 = p1.make_move(bd)
         bd.make_move(move1, "P1")
         print("P1 MOVE --------")
@@ -28,3 +30,6 @@ if __name__ == '__main__':
         bd.make_move(move2, "P2")
         for i in range(len(bd.board_to_tabular())):
             print(bd.board_to_tabular()[len(bd.board_to_tabular()) - i - 1])
+        tree = generate_game_tree("*", bd, 6)
+
+        print("\n\n\n")

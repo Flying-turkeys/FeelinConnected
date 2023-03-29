@@ -5,20 +5,17 @@ This file contains the data classes that will compose the AI used to create the 
 This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
 """
 from typing import Optional
-from board import Board
-from board import Piece
+from board import Board, Piece
 import game_tree as gt
 import random
 
 
 def generate_game_tree(root_move: Piece | str, game_state: Board, d: int) -> gt.GameTree:
     """Generate a complete game tree of depth d for all valid moves from the current game_state.
-
     For the returned GameTree:
         - Its root move is root_move.
         - It contains all possible move sequences of length <= d from game_state.
         - If d == 0, a size-one GameTree is returned.
-
     Preconditions:
         - d >= 0
         - root_move == a2_game_tree.GAME_START_MOVE or root_move is a valid move
@@ -36,17 +33,17 @@ def generate_game_tree(root_move: Piece | str, game_state: Board, d: int) -> gt.
         if game_state.get_winner() is not None:
             if game_state.get_winner()[0] == 'P1':
                 game_tree.player_winning_probability['P1'] = 1.0
-            elif game_state.get_winner()[0] == 'P2':
+            if game_state.get_winner()[0] == 'P2':
                 game_tree.player_winning_probability['P2'] = 1.0
         return game_tree
     elif game_state.first_player_turn():
         for move in possibles:
             new_state = game_state.copy_and_record_move(move.location, 'P1')
-            game_tree.add_subtree(generate_game_tree(new_state._pieces[move.location], new_state, d - 1))
+            game_tree.add_subtree(generate_game_tree(new_state.pieces[move.location], new_state, d - 1))
     else:
         for move in possibles:
             new_state = game_state.copy_and_record_move(move.location, 'P2')
-            game_tree.add_subtree((generate_game_tree(new_state._pieces[move.location], new_state, d - 1)))
+            game_tree.add_subtree((generate_game_tree(new_state.pieces[move.location], new_state, d - 1)))
     return game_tree
 
 
@@ -95,32 +92,38 @@ class GreedyPlayer(AbstractPlayer):
     #       The GameTree that this player uses to make its moves. If None, then this
     #       player behaves like aw.RandomGuesser.
     _game_tree: Optional[gt.GameTree]
-    _exploration_probability: float
+    player_id: str
+    opponent_id = str
 
-    def __init__(self, tree: Optional[gt.GameTree], exploration_probability: float = 0.0) -> None:
+    def __init__(self, tree: Optional[gt.GameTree], player_id: str) -> None:
         """Abstract method for initializing this player"""
         self._game_tree = tree
-        self._exploration_probability = exploration_probability
+        self.player_id = player_id
+        if player_id == 'P1':
+            self.opponent_id = 'P2'
+        else:
+            self.opponent_id = 'P1'
 
     def make_move(self, board: Board) -> Piece:
         """Abstract method for a player making a move on the board"""
-
-        # possible_moves = board.possible_moves()
-        # random_move = random.choice(list(possible_moves))
-        #
-        # if self._game_tree is not None:
-        #     if len(board.player_moves["P2"]) > 0:
-        #         self._game_tree = self._game_tree.find_subtree_by_move(board.player_moves["P2"][-1])
-        #     if not (self._game_tree is None or self._game_tree.get_subtrees() == []):
-        #         random_float = random.random()
-        #         if random_float < self._exploration_probability:
-        #             self._game_tree = self._game_tree.find_subtree_by_move(random_move)
-        #             return random_move
-        #         else:
-        #             sub = max(self._game_tree.get_subtrees(), key=lambda subtree: subtree.player_winning_probability["P2"])
-        #             self._game_tree = sub
-        #             return sub.move
-        # return random_move
+        possible_answers = board.possible_moves()
+        random_move = random.choice(list(possible_answers))
+        if self._game_tree is None:
+            return random_move
+        else:
+            self._game_tree = self._game_tree.find_subtree_by_move(board.player_moves[self.opponent_id][-1])
+            if self._game_tree is None or self._game_tree.get_subtrees() == []:
+                return random_move
+            else:
+                sub = max(self._game_tree.get_subtrees(),
+                          key=lambda subtree: subtree.player_winning_probability[self.player_id])
+                sub_op = max(self._game_tree.get_subtrees(),
+                             key=lambda subtree: subtree.player_winning_probability[self.opponent_id])
+                # if sub_op.player_winning_probability[self.opponent_id] == 1.0:
+                #     self._game_tree = sub_op
+                #     return sub_op.move
+                self._game_tree = sub
+                return sub.move
 
 
 if __name__ == '__main__':

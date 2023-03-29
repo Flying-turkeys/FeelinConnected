@@ -5,8 +5,8 @@ from players import generate_game_tree
 
 
 def test_game_tree():
-    b = Board(5)
-    print(generate_game_tree('*', b, 3))
+    b = Board(4)
+    print(generate_game_tree('*', b, 8))
 
 
 def test_copy():

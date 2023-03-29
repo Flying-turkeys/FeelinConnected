@@ -1,3 +1,5 @@
+
+
 """CSC111 Winter 2023 Final Project: Feelin Connected
 File Information
 ===============================
@@ -21,7 +23,6 @@ class Piece:
             The address (i.e unique identifier) of this node.
         - connections:
             A dictionary mapping the type of connections with a list of those types of connections.
-
     Representation Invariants:
         - all(key in {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'} for key in self.connections)
         - all(point >= 0 for point in self.location)
@@ -66,7 +67,6 @@ class Connection:
     def __init__(self, n1: Piece, n2: Piece, direction: str) -> None:
         """Initialize an empty connection with the two given pieces.
         Also add this connection to n1 and n2.
-
         Preconditions:
             - n1 != n2
             - n1 and n2 are not already connected by a connection
@@ -98,13 +98,12 @@ class Board:
         - _pieces: all nodes/pieces mapping a piece address to the actual piece
         - player_moves: moves mapping p1 and p2 to a list of their pieces/moves
         - width: width of the board
-
     Representation Invariants:
         - len(self.player_moves) == 2
         - all(key in {'P1', 'P2'} for key in self.player_moves)
         - 5 <= self.width <= 9
     """
-    _pieces: dict[tuple[int, int], Piece]
+    pieces: dict[tuple[int, int], Piece]
     player_moves: dict[str, list[Piece]]
     width: int
 
@@ -115,15 +114,15 @@ class Board:
         """
         self.width = width
         self.player_moves = {"P1": [], "P2": []}
-        self._pieces = {}
+        self.pieces = {}
         if pieces is None:
             for i in range(width):
                 for j in range(width):
                     location = (i, j)
                     new_piece = Piece(location)
-                    self._pieces[location] = new_piece
+                    self.pieces[location] = new_piece
         else:
-            self._pieces.update(pieces)
+            self.pieces.update(pieces)
 
     ####################################################################
     # Game functions
@@ -136,7 +135,7 @@ class Board:
             - move.location is a valid position to drop a piece (not a floating piece)
         """
         move.update_piece(player)
-        self._pieces[move.location].player = player
+        self.pieces[move.location].player = player
         if self.player_moves[player]:
             self.player_moves[player].append(move)
         else:
@@ -167,7 +166,6 @@ class Board:
     def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> bool:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
         of their connection. Returns whether the connecton was added successfully.
-
          Preconditions:
             - n1.player is not None and n2.player is not None
             - n1.player == n2.player
@@ -215,7 +213,7 @@ class Board:
             return ("P1", p1_max_connect)
         elif len(p2_max_connect) >= 4:
             return ("P2", p2_max_connect)
-        elif all(self._pieces[key].player is not None for key in self._pieces):
+        elif all(self.pieces[key].player is not None for key in self.pieces):
             return ("Tie", set())
         else:
             return None
@@ -225,10 +223,10 @@ class Board:
         possible_moves = set()
         for i in range(self.width):
             j = 0
-            while j < self.width and self._pieces[(i, j)].player is not None:
+            while j < self.width and self.pieces[(i, j)].player is not None:
                 j += 1
-            if j != self.width and self._pieces[(i, j)].player is None:
-                possible_moves.add(self._pieces[(i, j)])
+            if j != self.width and self.pieces[(i, j)].player is None:
+                possible_moves.add(self.pieces[(i, j)])
         return possible_moves
 
     def first_player_turn(self) -> bool:
@@ -244,24 +242,9 @@ class Board:
         """Return a copy of this game state with the given move."""
         new_game = Board(self.width)
         new_game.player_moves = copy.deepcopy(self.player_moves)
-        new_game._pieces = copy.deepcopy(self._pieces)
-        new_game.make_move(new_game._pieces[move_location], player)
+        new_game.pieces = copy.deepcopy(self.pieces)
+        new_game.make_move(new_game.pieces[move_location], player)
         return new_game
-
-    def get_move_sequence(self) -> list[Piece]:
-        """Return the move sequence made in this game.
-
-        The returned list alternates between guesses (str) and statuses (tuple[str, ...]):
-
-            [self.guesses[0], self.statuses[0], self.guesses[1], self.statuses[1], ...]
-        """
-        moves_so_far = []
-        for i in range(0, len(self.player_moves["P1"])):
-            moves_so_far.append(self.player_moves["P1"][i])
-            if i < len(self.player_moves["P2"]):  # self.statuses may be 1 shorter than self.guesses
-                moves_so_far.append(self.player_moves["P2"][i])
-
-        return moves_so_far
 
     def four_in_row(self, pieces: list[Piece]) -> bool:
         """Return if there are any four connected pieces on the board"""
@@ -294,7 +277,7 @@ class Board:
         for j in range(self.width):
             row = []
             for i in range(self.width):
-                piece = self._pieces[(i, j)]
+                piece = self.pieces[(i, j)]
                 if piece.player == "P1":
                     identifier = 1
                 elif piece.player == "P2":

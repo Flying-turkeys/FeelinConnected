@@ -1,5 +1,3 @@
-
-
 """CSC111 Winter 2023 Final Project: Feelin Connected
 File Information
 ===============================
@@ -35,7 +33,6 @@ class GameTree:
                  p1_win_prob: float = 0.0, p2_win_prob: float = 0.0) -> None:
         """Initialize a new game tree.
         Note that this initializer uses optional arguments.
-
         >>> game = GameTree()
         >>> game.move == GAME_START_MOVE
         True
@@ -52,7 +49,7 @@ class GameTree:
         """Return the subtree corresponding to the given move.
         Return None if no subtree corresponds to that move.
         """
-        if move.location in self._subtrees:
+        if move in self._subtrees:
             return self._subtrees[move]
         else:
             return None
@@ -73,12 +70,12 @@ class GameTree:
             - depth >= 0
         """
         if self.move == GAME_START_MOVE:
-            turn = "Welcome"
+            turn = "P1"
         elif self.move.player == "P2":
             turn = "P2"
         else:
             turn = "P1"
-        move_desc = f'{self.move} -> {turn}\n'
+        move_desc = f'{self.move} -> {turn} (% {self.player_winning_probability[turn] * 100})\n'
         str_so_far = '  ' * depth + move_desc
         for subtree in self._subtrees.values():
             str_so_far += subtree._str_indented(depth + 1)
@@ -86,17 +83,25 @@ class GameTree:
 
     def add_subtree(self, subtree: GameTree) -> None:
         """Add a subtree to this game tree."""
-        subtree._update_win_probability()
         self._subtrees[subtree.move] = subtree
+        self._update_player_win_probability()
 
-    def _update_win_probability(self) -> None:
-        """Recalculate the win probability of this tree."""
+    def _update_player_win_probability(self) -> None:
+        """Recalculate the player win probability of this tree.
+        """
         if self._subtrees:
-            percentages_so_far = [subtree.player_winning_probability['P2'] for subtree in self.get_subtrees()]
-            if self.first_player_turn():
+            percentages_so_far = [subtree.guesser_win_probability for subtree in self.get_subtrees()]
+            if self.is_guesser_turn():
                 self.guesser_win_probability = max(percentages_so_far)
             else:
                 self.guesser_win_probability = sum(percentages_so_far) / len(self.get_subtrees())
+        # if self._subtrees == {}:
+        #     return
+        # self.player_winning_probability['P1'] = sum(subtree.player_winning_probability['P1']
+        #                                             for subtree in self.get_subtrees()) / len(self._subtrees)
+
+        # self.player_winning_probability['P2'] = sum(subtree.player_winning_probability['P2']
+        #                                             for subtree in self.get_subtrees()) / len(self._subtrees)
 
 
 if __name__ == '__main__':
