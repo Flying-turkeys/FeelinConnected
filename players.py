@@ -93,20 +93,23 @@ class GreedyPlayer(AbstractPlayer):
     def __init__(self, tree: Optional[gt.GameTree], player_id: str) -> None:
         """Abstract method for initializing this player"""
         self._game_tree = tree
-        self.player_id = "P1"#player_id
-        self.opponent_id = "P2"
-        # if player_id == 'P1':
-        #     self.opponent_id = 'P2'
-        # else:
-        #     self.opponent_id = 'P1'
+        self.player_id = player_id
+        if player_id == 'P1':
+            self.opponent_id = 'P2'
+        else:
+            self.opponent_id = 'P1'
 
     def make_move(self, board: Board) -> Piece:
         """Abstract method for a player making a move on the board"""
-        possible_answers = board.possible_moves()
-        random_move = random.choice(list(possible_answers))
-        print(self._game_tree is not None)
+        possible_moves = board.possible_moves()
+        randint = random.randint(1, board.width - 2)
+        random_move = random.choice(list(possible_moves))
+        for move in possible_moves:
+            if move.location[0] == randint:
+                random_move = move
+
         if self._game_tree is None:
-            return self.educated_move(possible_answers, board)
+            return self.educated_move(possible_moves, board)
         else:
             if not board.player_moves[self.opponent_id]:  # First move of the player
                 self._game_tree = self._game_tree.find_subtree_by_move(random_move.location)
@@ -121,13 +124,24 @@ class GreedyPlayer(AbstractPlayer):
             else:
                 sub = max(self._game_tree.get_subtrees(),
                           key=lambda subtree: subtree.player_winning_probability[self.player_id])
-                # sub_op = max(self._game_tree.get_subtrees(),
-                #              key=lambda subtree: subtree.player_winning_probability[self.opponent_id])
-                # if sub_op.player_winning_probability[self.opponent_id] == 1.0:
-                #     self._game_tree = sub_op
-                #     return sub_op.move
                 self._game_tree = sub
+                if self._game_tree.get_subtrees():
+                    sub_op = max(self._game_tree.get_subtrees(),
+                                     key=lambda subtree: subtree.player_winning_probability[self.opponent_id])
+                    print(sub_op.player_winning_probability[self.opponent_id], "Us")
+                    print(sub.player_winning_probability[self.player_id], "AI")
+                else:
+                    return self.educated_move(possible_moves, board)
+
+                if sub_op.player_winning_probability[self.opponent_id] >= 0.8 \
+                        and sub.player_winning_probability[self.player_id] != 1.0:
+                    self._game_tree = sub_op
+                    return sub_op.move
+                if sub.player_winning_probability[self.player_id] <= 0.2:
+                    return self.educated_move(possible_moves, board)
+
                 return sub.move
+
 
     def educated_move(self, possible_moves: set[Piece], board: Board) -> Piece:
         """Returns the location of a move that makes the most connections in a weighted form"""
@@ -144,15 +158,6 @@ class GreedyPlayer(AbstractPlayer):
             else:
                 score_so_far[move] = sum(lengths_so_far) / len(lengths_so_far)
         return max(score_so_far, key=lambda key: score_so_far[key])
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':

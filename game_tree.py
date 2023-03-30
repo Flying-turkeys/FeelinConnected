@@ -92,18 +92,14 @@ class GameTree:
         """Recalculate the player win probability of this tree.
         """
         if self._subtrees:
-            percentages_so_far = [subtree.player_winning_probability["P1"] for subtree in self.get_subtrees()]
+            percentages_so_far_p1 = [subtree.player_winning_probability["P1"] for subtree in self.get_subtrees()]
+            percentages_so_far_p2 = [subtree.player_winning_probability["P2"] for subtree in self.get_subtrees()]
             if self.first_player_turn():
-                self.player_winning_probability["P1"] = sum(percentages_so_far) / len(self.get_subtrees())
+                self.player_winning_probability["P1"] = sum(percentages_so_far_p1) / len(self.get_subtrees())
+                self.player_winning_probability["P2"] = max(percentages_so_far_p2)
             else:
-                self.player_winning_probability["P1"] = max(percentages_so_far)
-        # if self._subtrees == {}:
-        #     return
-        # self.player_winning_probability['P1'] = sum(subtree.player_winning_probability['P1']
-        #                                             for subtree in self.get_subtrees()) / len(self._subtrees)
-
-        # self.player_winning_probability['P2'] = sum(subtree.player_winning_probability['P2']
-        #                                             for subtree in self.get_subtrees()) / len(self._subtrees)
+                self.player_winning_probability["P1"] = max(percentages_so_far_p1)
+                self.player_winning_probability["P2"] = sum(percentages_so_far_p2) / len(self.get_subtrees())
 
 
 if __name__ == '__main__':

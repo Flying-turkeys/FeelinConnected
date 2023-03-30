@@ -1,19 +1,22 @@
 """All testing not for handing in"""
 
 from board import Board, Piece
-from players import generate_game_tree
+from players import generate_game_tree, GreedyPlayer
 
 def test_win_prob():
-    b = Board(4)
-    b.make_move(b.pieces[(0, 0)], "P1")
-    b.make_move(b.pieces[(0, 1)], "P1")
+    b = Board(6)
     b.make_move(b.pieces[(0, 2)], "P1")
+    b.make_move(b.pieces[(0, 1)], "P1")
+    b.make_move(b.pieces[(0, 0)], "P2")
     b.make_move(b.pieces[(1, 0)], "P2")
-    b.make_move(b.pieces[(1, 1)], "P2")
-    b.make_move(b.pieces[(1, 2)], "P2")
-    b.make_move(b.pieces[(1, 3)], "P2")
+    b.make_move(b.pieces[(2, 0)], "P2")
+    tree = generate_game_tree(b.pieces[(1, 2)], b, 2)
+    for i in range(len(b.board_to_tabular())):
+        print(b.board_to_tabular()[len(b.board_to_tabular()) - i - 1])
+    p2 = GreedyPlayer(tree, "P1")
+    move2 = p2.make_move(b)
+    b.make_move(move2, "P1")
     print(b.get_winner())
-    #print(generate_game_tree("*", b, 2))
     for i in range(len(b.board_to_tabular())):
         print(b.board_to_tabular()[len(b.board_to_tabular()) - i - 1])
 
