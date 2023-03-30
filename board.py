@@ -1,10 +1,3 @@
-"""CSC111 Winter 2023 Final Project: Feelin Connected
-File Information
-===============================
-This file contains the data classes that will compose the graph used to create the Connect 4 game.
-This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
-"""
-
 from __future__ import annotations
 
 import copy
@@ -21,7 +14,6 @@ class Piece:
             The address (i.e unique identifier) of this node.
         - connections:
             A dictionary mapping the type of connections with a list of those types of connections.
-
     Representation Invariants:
         - all(key in {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'} for key in self.connections)
         - all(point >= 0 for point in self.location)
@@ -42,6 +34,21 @@ class Piece:
         """Updates the player of the piece"""
         self.player = player
 
+    def find_path_length(self, visited: set[Piece], direction: str) -> set[Piece]:
+        """Returns path in a specific direction"""
+        connects = self.connections[direction]
+
+        if len(connects) == 1 and connects[0].get_other_endpoint(self) in visited:
+            return {self}
+        path = {self}
+        visited.add(self)
+        for conn in connects:
+            endpoint_of_conn = conn.get_other_endpoint(self)
+            if endpoint_of_conn not in visited:
+                path.update(endpoint_of_conn.find_path_length(visited, direction))
+
+        return path
+
     def __repr__(self) -> str:
         """Return a string representing this piece.
         >>> piece = Piece((0, 0))
@@ -49,6 +56,8 @@ class Piece:
         Piece(0, 0)
         """
         return f'Piece{self.location}'
+
+
 
 
 class Connection:
@@ -66,7 +75,6 @@ class Connection:
     def __init__(self, n1: Piece, n2: Piece, direction: str) -> None:
         """Initialize an empty connection with the two given pieces.
         Also add this connection to n1 and n2.
-
         Preconditions:
             - n1 != n2
             - n1 and n2 are not already connected by a connection
@@ -74,6 +82,7 @@ class Connection:
         """
         self.type = direction
         self.endpoints = {n1, n2}
+
 
     def get_other_endpoint(self, piece: Piece) -> Piece:
         """Return the endpoint of this connection that is not equal to the given piece.
@@ -98,7 +107,6 @@ class Board:
         - _pieces: all nodes/pieces mapping a piece address to the actual piece
         - player_moves: moves mapping p1 and p2 to a list of their pieces/moves
         - width: width of the board
-
     Representation Invariants:
         - len(self.player_moves) == 2
         - all(key in {'P1', 'P2'} for key in self.player_moves)
@@ -167,7 +175,6 @@ class Board:
     def add_connection(self, n1: Piece, n2: Piece, connection_type: str) -> bool:
         """Given two Pieces adds an edge between two pieces given the specific type (direction)
         of their connection. Returns whether the connecton was added successfully.
-
          Preconditions:
             - n1.player is not None and n2.player is not None
             - n1.player == n2.player
@@ -181,18 +188,18 @@ class Board:
             n2.connections[connection_type].append(connection)
             return True
 
-    def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
+    def get_all_paths(self, direction: str, player: str) -> list[set[tuple[int, int]]]:
         """Gets all paths of piece for a given player in a specific direction"""
         pieces = self.player_moves[player]
         all_paths = []
         for piece in pieces:
-            path = {piece}
+            path = {piece.location}
             for connection in piece.connections[direction]:
                 next_piece = connection.get_other_endpoint(piece)
-                path.add(next_piece)
+                path.add(next_piece.location)
                 for connection1 in next_piece.connections[direction]:
                     next_next_piece = connection1.get_other_endpoint(piece)
-                    path.add(next_next_piece)
+                    path.add(next_next_piece.location)
             all_paths.append(path)
         return all_paths
 
@@ -272,13 +279,6 @@ class Board:
         elif next_pieces[0] is None:
             return 1
         return 1 + self.count_connected_pieces(next_pieces[0], direction, visited)
-
-    def _copy(self) -> Board:
-        """Return a copy of this game state."""
-        new_game = Board(self.width)
-        new_game.pieces = copy.deepcopy(self.pieces)
-        new_game.player_moves = copy.deepcopy(self.player_moves)
-        return new_game
 
     def board_to_tabular(self) -> list[list[int]]:
         """Returns the boards state in tabular data"""
