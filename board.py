@@ -1,5 +1,4 @@
 
-
 """CSC111 Winter 2023 Final Project: Feelin Connected
 File Information
 ===============================
@@ -43,6 +42,21 @@ class Piece:
         """Updates the player of the piece"""
         self.player = player
 
+    def find_path_length(self, visited: set[Piece], direction: str) -> set[Piece]:
+        """Returns path in a specific direction"""
+        connects = self.connections[direction]
+
+        if len(connects) == 1 and connects[0].get_other_endpoint(self) in visited:
+            return {self}
+        path = {self}
+        visited.add(self)
+        for conn in connects:
+            endpoint_of_conn = conn.get_other_endpoint(self)
+            if endpoint_of_conn not in visited:
+                path.update(endpoint_of_conn.find_path_length(visited, direction))
+
+        return path
+
     def __repr__(self) -> str:
         """Return a string representing this piece.
         >>> piece = Piece((0, 0))
@@ -50,6 +64,8 @@ class Piece:
         Piece(0, 0)
         """
         return f'Piece{self.location}'
+
+
 
 
 class Connection:
@@ -74,6 +90,7 @@ class Connection:
         """
         self.type = direction
         self.endpoints = {n1, n2}
+
 
     def get_other_endpoint(self, piece: Piece) -> Piece:
         """Return the endpoint of this connection that is not equal to the given piece.
@@ -179,18 +196,18 @@ class Board:
             n2.connections[connection_type].append(connection)
             return True
 
-    def get_all_paths(self, direction: str, player: str) -> list[set[Piece]]:
+    def get_all_paths(self, direction: str, player: str) -> list[set[tuple[int, int]]]:
         """Gets all paths of piece for a given player in a specific direction"""
         pieces = self.player_moves[player]
         all_paths = []
         for piece in pieces:
-            path = {piece}
+            path = {piece.location}
             for connection in piece.connections[direction]:
                 next_piece = connection.get_other_endpoint(piece)
-                path.add(next_piece)
+                path.add(next_piece.location)
                 for connection1 in next_piece.connections[direction]:
                     next_next_piece = connection1.get_other_endpoint(piece)
-                    path.add(next_next_piece)
+                    path.add(next_next_piece.location)
             all_paths.append(path)
         return all_paths
 
@@ -288,6 +305,14 @@ class Board:
             tabular_so_far.append(row)
         return tabular_so_far
 
+    def sequence(self):
+        moves = []
+        for i in range(len(self.player_moves["P2"])):
+            moves.append(self.player_moves["P1"][i])
+            moves.append(self.player_moves["P2"][i])
+        if len(self.player_moves["P2"]) < len(self.player_moves["P1"]):
+            moves.append(self.player_moves["P1"][-1])
+        return moves
 
 if __name__ == '__main__':
     import doctest

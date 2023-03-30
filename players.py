@@ -29,22 +29,39 @@ def generate_game_tree(root_move: Piece | str, game_state: Board, d: int) -> gt.
     possibles = game_state.possible_moves()
     if root_move in possibles:
         possibles.remove(root_move)
+    if game_state.get_winner() is not None:
+        if game_state.get_winner()[0] == 'P1':
+            game_tree.player_winning_probability['P1'] = 1.0
+        if game_state.get_winner()[0] == 'P2':
+            game_tree.player_winning_probability['P2'] = 1.0
+        return game_tree
     if d == 0:
-        if game_state.get_winner() is not None:
-            if game_state.get_winner()[0] == 'P1':
-                game_tree.player_winning_probability['P1'] = 1.0
-            if game_state.get_winner()[0] == 'P2':
-                game_tree.player_winning_probability['P2'] = 1.0
         return game_tree
     elif game_state.first_player_turn():
         for move in possibles:
+            # if score_of_move(move, game_state, 'P1') >= 10:
             new_state = game_state.copy_and_record_move(move.location, 'P1')
             game_tree.add_subtree(generate_game_tree(new_state.pieces[move.location], new_state, d - 1))
     else:
         for move in possibles:
+            # if score_of_move(move, game_state, 'P2') >= 10:
             new_state = game_state.copy_and_record_move(move.location, 'P2')
             game_tree.add_subtree((generate_game_tree(new_state.pieces[move.location], new_state, d - 1)))
     return game_tree
+
+
+def score_of_move(move: Piece, board: Board, player_id) -> float:
+    """Returns score of connection"""
+    hypo_state = board.copy_and_record_move(move.location, player_id)
+    lengths_so_far = []
+    for direction in move.connections:
+        num_connection = len(hypo_state.pieces[move.location].find_path_length(set(), direction))
+        if num_connection != 1:
+            lengths_so_far.append(num_connection)
+    if len(lengths_so_far) == 0:
+        return 0
+    else:
+        return sum(lengths_so_far) / len(lengths_so_far)
 
 
 class AbstractPlayer:
@@ -94,11 +111,13 @@ class GreedyPlayer(AbstractPlayer):
     _game_tree: Optional[gt.GameTree]
     player_id: str
     opponent_id = str
+    exploration = float
 
-    def __init__(self, tree: Optional[gt.GameTree], player_id: str) -> None:
+    def __init__(self, tree: Optional[gt.GameTree], player_id: str, exploration: float = 0.0) -> None:
         """Abstract method for initializing this player"""
         self._game_tree = tree
         self.player_id = player_id
+        self.exploration = exploration
         if player_id == 'P1':
             self.opponent_id = 'P2'
         else:
@@ -106,24 +125,69 @@ class GreedyPlayer(AbstractPlayer):
 
     def make_move(self, board: Board) -> Piece:
         """Abstract method for a player making a move on the board"""
-        possible_answers = board.possible_moves()
-        random_move = random.choice(list(possible_answers))
+        x = random.random()
+        possible_moves = board.possible_moves()
+        randint = random.randint(1, board.width - 2)
+        random_move = random.choice(list(possible_moves))
+        for move in possible_moves:
+            if move.location[0] == randint:
+                random_move = move
+
         if self._game_tree is None:
-            return random_move
+            return self.educated_move(possible_moves, board)
         else:
-            self._game_tree = self._game_tree.find_subtree_by_move(board.player_moves[self.opponent_id][-1])
-            if self._game_tree is None or self._game_tree.get_subtrees() == []:
+            if not board.player_moves[self.opponent_id]:  # First move of the player
+                self._game_tree = self._game_tree.find_subtree_by_move(random_move.location)
                 return random_move
             else:
+                oponent_move = board.player_moves[self.opponent_id][-1]
+                if oponent_move != self._game_tree.move:
+                    self._game_tree = self._game_tree.find_subtree_by_move(oponent_move.location)
+            if self._game_tree is None or self._game_tree.get_subtrees() == []:
+                self._game_tree = generate_game_tree(oponent_move, board, 4)
+                return self.make_move(board)
+                #return self.educated_move(possible_moves, board)
+            else:
+                if x < self.exploration:
+                    guess = random.choice(list(possible_moves))
+                    self._game_tree = self._game_tree.find_subtree_by_move(guess)
+                    return guess
                 sub = max(self._game_tree.get_subtrees(),
                           key=lambda subtree: subtree.player_winning_probability[self.player_id])
-                sub_op = max(self._game_tree.get_subtrees(),
-                             key=lambda subtree: subtree.player_winning_probability[self.opponent_id])
-                # if sub_op.player_winning_probability[self.opponent_id] == 1.0:
-                #     self._game_tree = sub_op
-                #     return sub_op.move
                 self._game_tree = sub
+                if self._game_tree.get_subtrees():
+                    sub_op = max(self._game_tree.get_subtrees(),
+                                 key=lambda subtree: subtree.player_winning_probability[self.opponent_id])
+                    # print("US", sub_op.player_winning_probability[self.opponent_id])
+                    # print("AI", sub.player_winning_probability[self.player_id])
+                else:
+                    return self.educated_move(possible_moves, board)
+
+                if sub_op.player_winning_probability[self.opponent_id] >= 0.8 \
+                        and sub.player_winning_probability[self.player_id] != 1.0:
+                    self._game_tree = sub_op
+                    return sub_op.move
+                if sub.player_winning_probability[self.player_id] <= 0.2:
+                    return self.educated_move(possible_moves, board)
+
                 return sub.move
+
+    def educated_move(self, possible_moves: set[Piece], board: Board) -> Piece:
+        """Returns the location of a move that makes the most connections in a weighted form"""
+        score_so_far = {}
+        for move in possible_moves:
+            hypo_state = board.copy_and_record_move(move.location, self.player_id)
+            lengths_so_far = []
+            for direction in move.connections:
+                num_connection = len(hypo_state.pieces[move.location].find_path_length(set(), direction))
+                if num_connection != 1:
+                    lengths_so_far.append(num_connection)
+            if len(lengths_so_far) == 0:
+                score_so_far[move] = 0
+            else:
+                score_so_far[move] = sum(lengths_so_far) / len(lengths_so_far)
+        return max(score_so_far, key=lambda key: score_so_far[key])
+
 
 
 if __name__ == '__main__':
