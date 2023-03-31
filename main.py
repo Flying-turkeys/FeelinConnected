@@ -13,7 +13,7 @@ if __name__ == '__main__':
     from board import Board
     from players import Person, GreedyPlayer, RandomPlayer, generate_game_tree
 
-    bd = Board(6)
+    bd = Board(7)
     # bd.make_move(bd.pieces[(0, 0)], "P1")
     # bd.make_move(bd.pieces[(1, 0)], "P2")
     # bd.make_move(bd.pieces[(0, 1)], "P1")

@@ -148,10 +148,9 @@ class GreedyPlayer(AbstractPlayer):
                     sub = sorted_subs[i]
                 if sub.player_winning_probability[self.opponent_id] == 1.0:
                     print('educated move')
-                    new_possibles = list(copy.deepcopy(possible_moves))
-                    new_possibles.remove(sub.move)
+                    new_possibles = {move for move in possible_moves if move.location != sub.move.location}
                     if new_possibles:
-                        return self.educated_move(set(new_possibles), board)
+                        return self.educated_move(new_possibles, board)
 
                 self._game_tree = sub
                 print('Using the Tree')
