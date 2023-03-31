@@ -1,3 +1,4 @@
+import copy
 from typing import Optional
 from board import Board, Piece
 import game_tree as gt
@@ -111,7 +112,7 @@ class GreedyPlayer(AbstractPlayer):
             assert all(random_move not in board.player_moves[key] for key in board.player_moves)
             return random_move
         else:
-            if not board.player_moves[self.opponent_id]:  # First move of the player
+            if not board.player_moves[self.opponent_id]:  # First move of the play
                 self._game_tree = self._game_tree.find_subtree_by_move(random_move.location)
                 print('returing a random move within range')
                 assert all(random_move not in board.player_moves[key] for key in board.player_moves)
@@ -142,9 +143,15 @@ class GreedyPlayer(AbstractPlayer):
                                      reverse=True)
                 i = 0
                 sub = sorted_subs[i]
+                while sub.player_winning_probability[self.opponent_id] == 1.0 and i < len(sorted_subs) - 1:
+                    i += 1
+                    sub = sorted_subs[i]
                 if sub.player_winning_probability[self.opponent_id] == 1.0:
                     print('educated move')
-                    return self.educated_move(possible_moves, board)
+                    new_possibles = list(copy.deepcopy(possible_moves))
+                    new_possibles.remove(sub.move)
+                    if new_possibles:
+                        return self.educated_move(set(new_possibles), board)
 
                 self._game_tree = sub
                 print('Using the Tree')
