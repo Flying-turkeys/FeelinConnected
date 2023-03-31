@@ -92,12 +92,7 @@ class GameTree:
         """Recalculate the player win probability of this tree.
         """
         if self._subtrees:
-            # self.player_winning_score["P1"] = sum(score_of_move(subtree.move, state, 'P1')
-            #                                       for subtree in self.get_subtrees())
-            # self.player_winning_score["P2"] = sum(score_of_move(subtree.move, state, 'P2')
-            #                                       for subtree in self.get_subtrees())
-            # percentages_so_far_p1 = [subtree.player_winning_probability["P1"] for subtree in self.get_subtrees()]
-            # percentages_so_far_p2 = [subtree.player_winning_probability["P2"] for subtree in self.get_subtrees()]
+
             subs = self.get_subtrees()
             if self.first_player_turn():
                 self.player_winning_probability["P1"] = max(subtree.player_winning_probability["P1"]

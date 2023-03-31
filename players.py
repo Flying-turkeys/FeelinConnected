@@ -144,13 +144,6 @@ class GreedyPlayer(AbstractPlayer):
                 if sub.player_winning_probability[self.opponent_id] == 1.0:
                     print('educated move')
                     return self.educated_move(possible_moves, board)
-                # while sub.player_winning_probability[self.opponent_id] == 1.0:
-                #     i += 1
-                #     if len(sorted_subs) > i:
-                #         sub = sorted_subs[i]
-                #     else:
-                #         print('playing random')
-                #         return random_move
 
                 self._game_tree = sub
                 print('Using the Tree')
