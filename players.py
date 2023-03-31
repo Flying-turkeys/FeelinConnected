@@ -126,13 +126,14 @@ class GreedyPlayer(AbstractPlayer):
                 return self.make_move(board)
             else:
                 for move in possible_moves:
-                    hypo2 = board.copy_and_record_move(move.location, self.player_id)
-                    hypo1 = board.copy_and_record_move(move.location, self.opponent_id)
-                    if hypo2.get_winner() is not None and hypo2.get_winner()[0] == self.player_id:
+                    hypo1 = board.copy_and_record_move(move.location, self.player_id)
+                    if hypo1.get_winner() is not None and hypo1.get_winner()[0] == self.player_id:
                         print('Got You')
                         assert all(move not in board.player_moves[key] for key in board.player_moves)
                         return move
-                    if hypo1.get_winner() is not None and hypo1.get_winner()[0] == self.opponent_id:
+                for move in possible_moves:
+                    hypo2 = board.copy_and_record_move(move.location, self.opponent_id)
+                    if hypo2.get_winner() is not None and hypo2.get_winner()[0] == self.opponent_id:
                         print('Blocking')
                         assert all(move not in board.player_moves[key] for key in board.player_moves)
                         return move
