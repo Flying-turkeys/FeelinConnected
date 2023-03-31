@@ -1,11 +1,9 @@
-
 """CSC111 Winter 2023 Final Project: Feelin Connected
 File Information
 ===============================
 This file contains the data classes that will compose the graph used to create the Connect 4 game.
 This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
 """
-
 from __future__ import annotations
 
 import copy
@@ -42,7 +40,7 @@ class Piece:
         """Updates the player of the piece"""
         self.player = player
 
-    def find_path_length(self, visited: set[Piece], direction: str) -> set[Piece]:
+    def find_path(self, visited: set[Piece], direction: str) -> set[Piece]:
         """Returns path in a specific direction"""
         connects = self.connections[direction]
 
@@ -53,7 +51,7 @@ class Piece:
         for conn in connects:
             endpoint_of_conn = conn.get_other_endpoint(self)
             if endpoint_of_conn not in visited:
-                path.update(endpoint_of_conn.find_path_length(visited, direction))
+                path.update(endpoint_of_conn.find_path(visited, direction))
 
         return path
 
@@ -64,8 +62,6 @@ class Piece:
         Piece(0, 0)
         """
         return f'Piece{self.location}'
-
-
 
 
 class Connection:
@@ -90,7 +86,6 @@ class Connection:
         """
         self.type = direction
         self.endpoints = {n1, n2}
-
 
     def get_other_endpoint(self, piece: Piece) -> Piece:
         """Return the endpoint of this connection that is not equal to the given piece.
@@ -279,7 +274,6 @@ class Board:
         visited.add(piece)
         if direction not in piece.connections:
             return 1
-        # gets next piece by searching current piece connections in the given direction, recursive?
         next_pieces = [p.get_other_endpoint(piece) for p in piece.connections[direction]]
 
         if next_pieces:
@@ -305,14 +299,6 @@ class Board:
             tabular_so_far.append(row)
         return tabular_so_far
 
-    def sequence(self):
-        moves = []
-        for i in range(len(self.player_moves["P2"])):
-            moves.append(self.player_moves["P1"][i])
-            moves.append(self.player_moves["P2"][i])
-        if len(self.player_moves["P2"]) < len(self.player_moves["P1"]):
-            moves.append(self.player_moves["P1"][-1])
-        return moves
 
 if __name__ == '__main__':
     import doctest
