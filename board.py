@@ -34,7 +34,7 @@ class Piece:
         """Updates the player of the piece"""
         self.player = player
 
-    def find_path_length(self, visited: set[Piece], direction: str) -> set[Piece]:
+    def find_path(self, visited: set[Piece], direction: str) -> set[Piece]:
         """Returns path in a specific direction"""
         connects = self.connections[direction]
 
@@ -45,7 +45,7 @@ class Piece:
         for conn in connects:
             endpoint_of_conn = conn.get_other_endpoint(self)
             if endpoint_of_conn not in visited:
-                path.update(endpoint_of_conn.find_path_length(visited, direction))
+                path.update(endpoint_of_conn.find_path(visited, direction))
 
         return path
 
@@ -56,8 +56,6 @@ class Piece:
         Piece(0, 0)
         """
         return f'Piece{self.location}'
-
-
 
 
 class Connection:

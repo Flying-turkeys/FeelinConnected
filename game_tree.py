@@ -77,8 +77,8 @@ class GameTree:
             turn = "P2"
         else:
             turn = "P1"
-        move_desc = f'{self.move} -> {turn} (% {self.player_winning_probability[turn] * 100})\n'
-        str_so_far = '  ' * depth + move_desc
+        move_desc = f'{self.move} -> {turn} ({self.player_winning_probability[turn]})\n'
+        str_so_far = '        ' * depth + move_desc
         for subtree in self._subtrees.values():
             str_so_far += subtree._str_indented(depth + 1)
         return str_so_far
@@ -92,14 +92,37 @@ class GameTree:
         """Recalculate the player win probability of this tree.
         """
         if self._subtrees:
-            percentages_so_far_p1 = [subtree.player_winning_probability["P1"] for subtree in self.get_subtrees()]
-            percentages_so_far_p2 = [subtree.player_winning_probability["P2"] for subtree in self.get_subtrees()]
+            # self.player_winning_score["P1"] = sum(score_of_move(subtree.move, state, 'P1')
+            #                                       for subtree in self.get_subtrees())
+            # self.player_winning_score["P2"] = sum(score_of_move(subtree.move, state, 'P2')
+            #                                       for subtree in self.get_subtrees())
+            # percentages_so_far_p1 = [subtree.player_winning_probability["P1"] for subtree in self.get_subtrees()]
+            # percentages_so_far_p2 = [subtree.player_winning_probability["P2"] for subtree in self.get_subtrees()]
+            subs = self.get_subtrees()
             if self.first_player_turn():
-                self.player_winning_probability["P1"] = sum(percentages_so_far_p1) / len(self.get_subtrees())
-                self.player_winning_probability["P2"] = max(percentages_so_far_p2)
+                self.player_winning_probability["P1"] = max(subtree.player_winning_probability["P1"]
+                                                            for subtree in subs)
+                self.player_winning_probability["P2"] = sum(subtree.player_winning_probability["P2"]
+                                                            for subtree in subs) / len(subs)
             else:
-                self.player_winning_probability["P1"] = max(percentages_so_far_p1)
-                self.player_winning_probability["P2"] = sum(percentages_so_far_p2) / len(self.get_subtrees())
+                self.player_winning_probability["P1"] = sum(subtree.player_winning_probability["P1"]
+                                                            for subtree in subs) / len(subs)
+                self.player_winning_probability["P2"] = max(subtree.player_winning_probability["P2"]
+                                                            for subtree in subs)
+
+
+def score_of_move(move: Piece, board: Board, player_id) -> float:
+    """Returns score of connection"""
+    hypo_state = board.copy_and_record_move(move.location, player_id)
+    lengths_so_far = []
+    for direction in move.connections:
+        num_connection = len(hypo_state.pieces[move.location].find_path(set(), direction))
+        if num_connection != 1:
+            lengths_so_far.append(num_connection)
+    if len(lengths_so_far) == 0:
+        return 0
+    else:
+        return sum(lengths_so_far) / len(lengths_so_far)
 
 
 if __name__ == '__main__':

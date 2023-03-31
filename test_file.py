@@ -23,7 +23,7 @@ def test_win_prob():
 
 def test_game_tree():
     b = Board(5)
-    print(generate_game_tree('*', b, 3))
+    print(generate_game_tree('*', b, 6))
 
 
 def test_copy():

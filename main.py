@@ -13,32 +13,37 @@ if __name__ == '__main__':
     from board import Board
     from players import Person, GreedyPlayer, RandomPlayer, generate_game_tree
 
-    if __name__ == '__main__':
-        bd = Board(6)
-        # bd.make_move(bd.pieces[(0, 0)], "P1")
-        # bd.make_move(bd.pieces[(1, 0)], "P2")
-        # bd.make_move(bd.pieces[(0, 1)], "P1")
-        # bd.make_move(bd.pieces[(1, 1)], "P2")
-        # bd.make_move(bd.pieces[(0, 2)], "P1")
-        tree = generate_game_tree("*", bd, 4)
-        #bd.make_move(bd.pieces[(1, 2)], "P2")
+    bd = Board(6)
+    # bd.make_move(bd.pieces[(0, 0)], "P1")
+    # bd.make_move(bd.pieces[(1, 0)], "P2")
+    # bd.make_move(bd.pieces[(0, 1)], "P1")
+    # bd.make_move(bd.pieces[(1, 1)], "P2")
+    # bd.make_move(bd.pieces[(0, 2)], "P1")
+    tree = None
+    #bd.make_move(bd.pieces[(1, 2)], "P2")
 
+    p1 = Person()
+    p2 = GreedyPlayer(tree, "P2")
 
-        p2 = Person()
-        p1 = GreedyPlayer(tree, "P1")
-
-        print("START")
-        for i in range(len(bd.board_to_tabular())):
-            print(bd.board_to_tabular()[len(bd.board_to_tabular()) - i - 1])
-        while bd.get_winner() is None:
+    print("START")
+    for i in range(len(bd.board_to_tabular())):
+        print(bd.board_to_tabular()[len(bd.board_to_tabular()) - i - 1])
+    count = 0
+    while bd.get_winner() is None:
+        if bd.get_winner() is None:
             move1 = p1.make_move(bd)
             bd.make_move(move1, "P1")
-            print("P1 MOVE --------")
-            for i in range(len(bd.board_to_tabular())):
-                print(bd.board_to_tabular()[len(bd.board_to_tabular()) - i - 1])
+            if count >= 1:
+                tree = generate_game_tree(bd.player_moves['P1'][-1], bd, 4)
+                p2 = GreedyPlayer(tree, "P2")
+        print("P1 MOVE --------")
+        for i in range(len(bd.board_to_tabular())):
+            print(bd.board_to_tabular()[len(bd.board_to_tabular()) - i - 1])
+        if bd.get_winner() is None:
             print("P2 MOVE --------")
             move2 = p2.make_move(bd)
             bd.make_move(move2, "P2")
             for i in range(len(bd.board_to_tabular())):
                 print(bd.board_to_tabular()[len(bd.board_to_tabular()) - i - 1])
-        print(bd.get_winner())
+        count += 1
+    print(bd.get_winner())
