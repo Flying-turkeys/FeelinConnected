@@ -10,7 +10,7 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 import pygame
 from board import Board, Piece
 from typing import Optional
-from players import GreedyPlayer
+from players import GreedyPlayer, generate_game_tree
 
 
 # Colours used within the implementation:
@@ -129,7 +129,7 @@ class GameBoard(Board):
             print('You cannot place there anymore!')
             return min_y
 
-    def determine_colour(self, opposite: Optional = False) -> tuple[int, int, int]:
+    def determine_colour(self, opposite: bool = False) -> tuple[int, int, int]:
         """Return the colour that should be displayed on the game board. If opposite
          is True, return the opposing player colour."""
 
@@ -218,7 +218,6 @@ class GameBoard(Board):
         running = True
         while running:
 
-            self.check_winner(game_surface)
             clock.tick(60)
 
             for event in pygame.event.get():
@@ -232,8 +231,8 @@ class GameBoard(Board):
                         convert_cord = self.convert_coordinates(new_move)
                         game_piece = self.pieces[convert_cord]
                         self.visualize_and_record_move(game_piece, game_surface)
+                        self.check_winner(game_surface)
 
-            self.check_winner(game_surface)
             pygame.display.update()
 
         quit()
@@ -259,31 +258,42 @@ class GameBoard(Board):
 
         self.draw_slots(game_surface)
 
+        iteration = 0
+
         running = True
         while running:
-
-            if not self.first_player_turn():
-                new_move = ai_player.make_move(self)
-                if self.get_winner() is not None:
-                    self.check_winner(game_surface)
-                else:
-                    self.visualize_and_record_move(new_move, game_surface)
-
-            clock.tick(60)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
 
-                    clicks = [slot.collidepoint(event.pos) for slot in self.slots]
-                    if any(clicks):
-                        new_move = self.player_click_to_coordinates(clicks)
-                        convert_cord = self.convert_coordinates(new_move)
-                        game_piece = self.pieces[convert_cord]
-                        self.visualize_and_record_move(game_piece, game_surface)
+            clock.tick(60)
 
-            self.check_winner(game_surface)
+            if not self.first_player_turn():
+                new_move = ai_player.make_move(self)
+                self.visualize_and_record_move(new_move, game_surface)
+                convert_move = self.convert_coordinates(new_move.location)
+                self.column_spaces[convert_move[0]].remove(convert_move[1])
+                self.check_winner(game_surface)
+                iteration += 1
+            else:
+                for event in pygame.event.get():
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+
+                        # if self.first_player_turn():
+                        clicks = [slot.collidepoint(event.pos) for slot in self.slots]
+                        if any(clicks):
+                            new_move = self.player_click_to_coordinates(clicks)
+                            convert_cord = self.convert_coordinates(new_move)
+                            game_piece = self.pieces[convert_cord]
+                            self.visualize_and_record_move(game_piece, game_surface)
+                            self.check_winner(game_surface)
+                            iteration += 1
+
+                            if iteration >= 3:
+                                tree = generate_game_tree(self.player_moves['P1'][-1], self, 4)
+                                ai_player = GreedyPlayer(tree, 'P2')
+
             pygame.display.update()
 
         quit()
