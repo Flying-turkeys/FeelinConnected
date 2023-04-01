@@ -1,7 +1,9 @@
 """CSC111 Winter 2023 Final Project: Feelin Connected
+
 File Information
 ===============================
 This file contains the the functions calls to run the program from start to finish.
+
 This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
 """
 
@@ -10,11 +12,8 @@ if __name__ == '__main__':
     pass
     from board import Board
     from players import Person, GreedyPlayer, RandomPlayer, generate_game_tree
-    from uiUpdated import GameBoard
-    b = GameBoard(7)
-    b.run_game()
 
-    bd = Board(6)
+    bd = Board(7)
     tree = None
 
     p1 = Person()
