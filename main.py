@@ -14,13 +14,7 @@ if __name__ == '__main__':
     from players import Person, GreedyPlayer, RandomPlayer, generate_game_tree
 
     bd = Board(7)
-    # bd.make_move(bd.pieces[(0, 0)], "P1")
-    # bd.make_move(bd.pieces[(1, 0)], "P2")
-    # bd.make_move(bd.pieces[(0, 1)], "P1")
-    # bd.make_move(bd.pieces[(1, 1)], "P2")
-    # bd.make_move(bd.pieces[(0, 2)], "P1")
     tree = None
-    #bd.make_move(bd.pieces[(1, 2)], "P2")
 
     p1 = Person()
     p2 = GreedyPlayer(tree, "P2")

@@ -1,5 +1,13 @@
-from __future__ import annotations
+"""CSC111 Winter 2023 Final Project: Feelin Connected
 
+File Information
+===============================
+This file contains the data classes that will compose the graph used to create the Connect 4 game.
+
+This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
+"""
+
+from __future__ import annotations
 import copy
 from typing import Optional
 
@@ -77,10 +85,10 @@ class Connection:
             - n1 != n2
             - n1 and n2 are not already connected by a connection
             - n1 and n2 make a valid connection on the board
+            - direction is the correct direction of the connection
         """
         self.type = direction
         self.endpoints = {n1, n2}
-
 
     def get_other_endpoint(self, piece: Piece) -> Piece:
         """Return the endpoint of this connection that is not equal to the given piece.
@@ -91,7 +99,7 @@ class Connection:
 
     def __repr__(self) -> str:
         """Return a string representing this connection.
-        >>> connection = Connection(Piece((0, 0)), Piece((0, 1)))
+        >>> connection = Connection(Piece((0, 0)), Piece((0, 1)), "horizontal")
         >>> repr(connection) in {'Connection(Piece(0, 0), Piece(0, 1))', 'Connection(Piece(0, 1), Piece(0, 0))'}
         True
         """
@@ -102,7 +110,7 @@ class Connection:
 class Board:
     """A graph that represents a Connect 4 board and holds all empty and non-empty spaces/pieces.
     Instance Attributes:
-        - _pieces: all nodes/pieces mapping a piece address to the actual piece
+        - pieces: all nodes/pieces mapping a piece address to the actual piece
         - player_moves: moves mapping p1 and p2 to a list of their pieces/moves
         - width: width of the board
     Representation Invariants:
@@ -117,7 +125,7 @@ class Board:
     def __init__(self, width: int, pieces: dict[tuple[int, int], Piece] = None) -> None:
         """Initialize this board with the dimensions of width by width.
         Preconditions:
-            - 5 <= width <= 9
+            - 4 <= width <= 7
         """
         self.width = width
         self.player_moves = {"P1": [], "P2": []}
@@ -187,7 +195,11 @@ class Board:
             return True
 
     def get_all_paths(self, direction: str, player: str) -> list[set[tuple[int, int]]]:
-        """Gets all paths of piece for a given player in a specific direction"""
+        """Gets all paths of piece for a given player in a specific direction
+        Preconditions:
+            - direction in {'vertical', 'horizontal', 'left-diagonal', 'right-diagonal'}
+            - player in {"P1", "P2"}
+        """
         pieces = self.player_moves[player]
         all_paths = []
         for piece in pieces:
@@ -299,3 +311,10 @@ class Board:
 if __name__ == '__main__':
     import doctest
     doctest.testmod(verbose=True)
+
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'max-nested-blocks': 4,
+        'extra-imports': ['copy'],
+    })
