@@ -35,7 +35,6 @@ class GameTree:
     #  - _subtrees:
     #      the subtrees of this tree, which represent the game trees after a possible
     #      move by the current player.
-
     def __init__(self, move: Piece | str = GAME_START_MOVE,
                  p1_win_prob: float = 0.0, p2_win_prob: float = 0.0) -> None:
         """Initialize a new game tree.
@@ -105,8 +104,8 @@ class GameTree:
                                                             for subtree in subs)
 
 
-def score_of_move(move: Piece, board: Board, player_id: str) -> float:
-    """Returns a score of a move based on the number of connections and types it makes"""
+def score_of_move(move: Piece, board: Board, player_id) -> float:
+    """Returns score of connection"""
     hypo_state = board.copy_and_record_move(move.location, player_id)
     lengths_so_far = []
     for direction in move.connections:

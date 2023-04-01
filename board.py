@@ -265,6 +265,31 @@ class Board:
         new_game.make_move(new_game.pieces[move_location], player)
         return new_game
 
+    def four_in_row(self, pieces: list[Piece]) -> bool:
+        """Return if there are any four connected pieces on the board"""
+        for piece in pieces:
+            for direction in piece.connections:
+                count = self.count_connected_pieces(piece, direction, set())
+                if count == 4:
+                    return True
+        return False
+
+    def count_connected_pieces(self, piece: Piece, direction: str, visited: set[Piece]) -> int:
+        """return the amount of connected pieces in given direction starting from given piece"""
+        if piece in visited:
+            return 0
+        visited.add(piece)
+        if direction not in piece.connections:
+            return 1
+        # gets next piece by searching current piece connections in the given direction, recursive?
+        next_pieces = [p.get_other_endpoint(piece) for p in piece.connections[direction]]
+
+        if next_pieces:
+            return 0
+        elif next_pieces[0] is None:
+            return 1
+        return 1 + self.count_connected_pieces(next_pieces[0], direction, visited)
+
     def board_to_tabular(self) -> list[list[int]]:
         """Returns the boards state in tabular data"""
         tabular_so_far = []
