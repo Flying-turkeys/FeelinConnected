@@ -7,9 +7,9 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 """
 
 from board import Piece, Board, Connection
-from players import GreedyPlayer, Person
 import pygame
 from typing import Optional
+from players import GreedyPlayer
 
 # COLOURS
 # SALMON KHAKI PIECES WITH AQUAMARINE BOARD, LIGHT GREY BACKGROUND
@@ -71,6 +71,61 @@ class GameBoard(Board):
 
     def run_game(self) -> Optional[tuple[str, set[Piece]]]:
         """Run the game. If any player wins, returns player and path of win."""
+
+        # pygame.init()
+        #
+        # pygame.display.set_caption('FeelinConnected')
+        #
+        # pygame.display.flip()
+        # clock = pygame.time.Clock()
+        #
+        # # Slider Colour and Token Colour must behave according to player turns.
+        # slider_colours = [P1_SALMON, P2_KHAKI]
+        # color_index = 0
+        # color = slider_colours[color_index]
+        # slider_x = self._tile_size
+        # slider_y = self._tile_size - (self._tile_size // 2)
+        #
+        # self.draw_game_slots()
+        #
+        # finished = False
+        # while not finished:
+        #
+        #     if self.get_winner() is not None:
+        #         # Note: This is temporary, does not account for ties.
+        #         self._window.fill(slider_colours[(color_index + 1) % len(slider_colours)])
+        #         pygame.display.update()
+        #         return self.get_winner()
+        #
+        #     clock.tick(60)
+        #     for event in pygame.event.get():
+        #         if event.type == pygame.QUIT:
+        #             finished = True
+        #         if event.type == pygame.MOUSEMOTION:
+        #
+        #             mouse_x = event.pos[0]
+        #             if mouse_x < slider_x and slider_x > (self.width * self._tile_size) - (self.width * self._tile_size - 40):
+        #                 slider_x -= 10
+        #             if mouse_x > slider_x and slider_x < (self.width * self._tile_size - 40):
+        #                 slider_x += 10
+        #
+        #         if event.type == pygame.MOUSEBUTTONDOWN:
+        #
+        #             collisions = [circle.collidepoint(event.pos) for circle in CIRCLES]
+        #             if any(collisions):
+        #
+        #                 color_index = (color_index + 1) % len(slider_colours)
+        #                 color = slider_colours[color_index]
+        #
+        #                 colour = slider_colours[(color_index + 1) % len(slider_colours)]
+        #                 self.place_game_piece(colour, collisions)
+        #
+        #     pygame.draw.rect(self._window, BA_LAVANDAR, (0, 0, self.width * self._tile_size, self._tile_size))
+        #     pygame.draw.circle(self._window, color, (slider_x, slider_y), self._tile_size // 2 - 3)
+        #
+        #     pygame.display.update()
+        # quit()
+
         tree = None
         p2 = GreedyPlayer(tree, "P2")
 
@@ -92,14 +147,41 @@ class GameBoard(Board):
 
         finished = False
         while not finished:
-            if self.get_winner() is not None:
-                # Note: This is temporary, does not account for ties.
-                self._window.fill(slider_colours[(color_index + 1) % len(slider_colours)])
-                pygame.display.update()
-                return self.get_winner()
-
             clock.tick(60)
-            if not self.first_player_turn():
+
+            if self.first_player_turn():
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        finished = True
+                    if event.type == pygame.MOUSEMOTION:
+
+                        mouse_x = event.pos[0]
+                        if mouse_x < slider_x and slider_x > (self.width * self._tile_size) - (
+                                self.width * self._tile_size - 40):
+                            slider_x -= 10
+                        if mouse_x > slider_x and slider_x < (self.width * self._tile_size - 40):
+                            slider_x += 10
+
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+
+                        collisions = [circle.collidepoint(event.pos) for circle in CIRCLES]
+                        if any(collisions):
+                            color_index = (color_index + 1) % len(slider_colours)
+                            color = slider_colours[color_index]
+
+                            colour = slider_colours[(color_index + 1) % len(slider_colours)]
+
+
+                            collision_i = collisions.index(True)
+                            x_pos = CIRCLES[collision_i].centerx + 0.5
+                            y_pos = max(self.column_stack[x_pos])
+                            new_game_piece = x_pos, y_pos
+
+                            location = self.pieces_to_location[new_game_piece]
+                            self.place_game_piece(colour, collisions, "P1")
+                            print(self.get_winner(), "P1: ", location)
+
+            else:
                 move = p2.make_move(self)
                 self.make_move(move, "P2")
 
@@ -110,32 +192,19 @@ class GameBoard(Board):
 
                 x_cord = move_loc[0]
                 y_cord = max(self.column_stack[x_cord])
-                pygame.draw.circle(self._window, color, (x_cord, y_cord), self._tile_size // 2 - 3)
-            else:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        finished = True
-                    if event.type == pygame.MOUSEMOTION:
+                pygame.draw.circle(self._window, P2_KHAKI, (x_cord, y_cord), self._tile_size // 2 - 3)
+                self.column_stack[x_cord].remove(y_cord)
+                print(self.get_winner(), "P2: ", move.location)
 
-                        mouse_x = event.pos[0]
-                        if mouse_x < slider_x and slider_x > (self.width * self._tile_size) - (self.width * self._tile_size - 40):
-                            slider_x -= 10
-                        if mouse_x > slider_x and slider_x < (self.width * self._tile_size - 40):
-                            slider_x += 10
-
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-
-                        collisions = [circle.collidepoint(event.pos) for circle in CIRCLES]
-                        if any(collisions):
-
-                            color_index = (color_index + 1) % len(slider_colours)
-                            color = slider_colours[color_index]
-
-                            colour = slider_colours[(color_index + 1) % len(slider_colours)]
-                            self.place_game_piece(colour, collisions)
+            if self.get_winner() is not None:
+                # Note: This is temporary, does not account for ties.
+                print(self.get_winner())
+                self._window.fill("Green")
+                #pygame.display.update()
+                return self.get_winner()
 
             pygame.draw.rect(self._window, BA_LAVANDAR, (0, 0, self.width * self._tile_size, self._tile_size))
-            pygame.draw.circle(self._window, color, (slider_x, slider_y), self._tile_size // 2 - 3)
+            pygame.draw.circle(self._window, "red", (slider_x, slider_y), self._tile_size // 2 - 3)
 
             pygame.display.update()
         quit()
@@ -158,7 +227,7 @@ class GameBoard(Board):
 
         pygame.display.update()
 
-    def place_game_piece(self, colour: tuple, collisions: list) -> None:
+    def place_game_piece(self, colour: tuple, collisions: list, player_id: str) -> None:
         """place a game piece within the specified player position."""
 
         new_color = colour
@@ -169,19 +238,14 @@ class GameBoard(Board):
         new_game_piece = x_pos, y_pos
 
         location = self.pieces_to_location[new_game_piece]
-        piece = self.pieces[location]
-        self.player_moves["P1"].append(piece)
-        #new_piece = Piece(location)
-        # if self.first_player_turn():
-        #     player = "P1"
-        # else:
-        #     player = "P2"
+        new_piece = self.pieces[location]
 
-        self.make_move(piece, "P1")
+        self.make_move(new_piece, player_id)
 
         pygame.draw.circle(self._window, new_color, new_game_piece, self._tile_size // 2 - 3)
         self.column_stack[x_pos].remove(y_pos)
 
+        pygame.display.update()
 
 # class GamePiece(Piece):
 #     """A subclass of Piece, except with additional methods in order
