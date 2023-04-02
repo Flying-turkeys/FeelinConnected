@@ -138,7 +138,7 @@ class GreedyPlayer(AbstractPlayer):
 
             self._game_tree = sub
             assert all(sub.move not in board.player_moves[key] for key in board.player_moves)
-            return (sub.move, "Subtree Move")
+            return (sub.move, "Umm let me think")
 
     def check_crucial_move(self, possible_moves: set[Piece], board: Board) -> Optional[tuple[Piece, str]]:
         """Returns a move if either p1 or p2 are can make a move to win. If AI has a winning move
@@ -151,7 +151,7 @@ class GreedyPlayer(AbstractPlayer):
             hypo1 = board.copy_and_record_move(move.location, self.player_id)
             if hypo1.get_winner() is not None and hypo1.get_winner()[0] == self.player_id:
                 assert all(move not in board.player_moves[key] for key in board.player_moves)
-                return (move, 'Got You')
+                return (move, 'I win')
         for move in possible_moves:
             hypo2 = board.copy_and_record_move(move.location, self.opponent_id)
             if hypo2.get_winner() is not None and hypo2.get_winner()[0] == self.opponent_id:

@@ -199,8 +199,8 @@ class GameBoard(Board):
     def fill_winner_colour(self, surface: pygame.Surface) -> None:
         """If a player has won, fill the winning sequence of moves with a darker colour."""
 
-        dark_red = (205, 92, 92)
-        dark_orange = (219, 143, 2)
+        dark_red = (220, 20, 60)
+        dark_orange = (255, 255, 0)
 
         player = self.get_winner()[0]
         sequence = self.get_winner()[1]
@@ -223,6 +223,8 @@ class GameBoard(Board):
                                    center=coordinates,
                                    radius=self._proportionality // 2 - 3)
                 pygame.display.update()
+
+        pygame.time.wait(10000)
 
     def piece_drop_animation(self, x_coordinate: float, surface: pygame.Surface) -> None:
         """Add a dropping effect to where a game piece is being placed."""
@@ -257,6 +259,18 @@ class GameBoard(Board):
                            center=coordinates,
                            radius=self._proportionality // 2 - 3)
 
+        pygame.display.update()
+
+    def display_ai_message(self, message: str, surface: pygame.Surface) -> None:
+        """Given a message produced by the Ai in Player-verses-Ai game state, dispplay that message at the
+        top of the board.
+        """
+        font_type = pygame.font.Font('Pixeltype.ttf', 45)
+        text = font_type.render(message, True, 'black')
+        surface.blit(text, (20, 28))
+        pygame.display.update()
+        pygame.time.wait(1500)
+        pygame.draw.rect(surface, BA_LAVANDAR, (0, 0, self.width * self._proportionality, self._proportionality))
         pygame.display.update()
 
     def run_pvp_state(self) -> None:
@@ -353,12 +367,14 @@ class GameBoard(Board):
 
             if not self.first_player_turn():
                 new_move = ai_player.make_move(self)
+                self.display_ai_message(new_move[1] + '...', game_surface)
                 self.visualize_and_record_move(new_move[0], game_surface)
                 convert_move = self.convert_coordinates(new_move[0].location)
                 self.column_spaces[convert_move[0]].remove(convert_move[1])
                 self.check_winner(game_surface)
                 iteration += 1
             else:
+                self.display_ai_message("Your Turn", game_surface)
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         clicks = [slot.collidepoint(event.pos) for slot in self.slots]
