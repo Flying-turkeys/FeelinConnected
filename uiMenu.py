@@ -49,7 +49,7 @@ pygame.display.flip()
 class Button:
     """A subclass which aids in the creation of all buttons used in this game.
     Instance Attributes:
-        - rect: a pygame object which stores and manipulates rectangular areas
+        - rect: a pygame object which stores and manipulates the rectangular area of the image
     """
     # Private Instance Attributes:
     #   - _pressed: a boolean value which represents whether the button object has been
@@ -141,21 +141,18 @@ font = pygame.font.Font('Pixeltype.ttf', 35)
 font1 = pygame.font.Font('Pixeltype.ttf', 30)
 font2 = pygame.font.Font('Pixeltype.ttf', 25)
 # load pvp button images
-player_v_player = pygame.image.load('button1.png').convert_alpha(window)
-player_v_player = pygame.transform.scale(player_v_player, (350, 350))
-player_v_player_hovered = pygame.image.load('button1-hovered.png').convert_alpha(window)
-player_v_player_hovered = pygame.transform.scale(player_v_player_hovered, (350, 350))
+player_v_player = pygame.image.load('button1_f.png').convert_alpha(window)
+player_v_player = pygame.transform.scale(player_v_player, (140, 140))
+player_v_player_hovered = pygame.image.load('button1-hovered_f.png').convert_alpha(window)
+player_v_player_hovered = pygame.transform.scale(player_v_player_hovered, (140, 140))
 # load pvc button images
-player_v_pc = pygame.image.load('button2.png').convert_alpha(window)
-player_v_pc = pygame.transform.scale(player_v_pc, (350, 350))
-player_v_pc_hovered = pygame.image.load('button2-hovered.png').convert_alpha(window)
-player_v_pc_hovered = pygame.transform.scale(player_v_pc_hovered, (350, 350))
+player_v_pc = pygame.image.load('button2_f.png').convert_alpha(window)
+player_v_pc = pygame.transform.scale(player_v_pc, (140, 140))
+player_v_pc_hovered = pygame.image.load('button2-hovered_f.png').convert_alpha(window)
+player_v_pc_hovered = pygame.transform.scale(player_v_pc_hovered, (140, 140))
 # Convert images into button objects
-button1 = Button(window.get_rect().width // 2 - 260, window.get_rect().height // 2 - 125, player_v_player, 6)
-button2 = Button(window.get_rect().width // 2 - 90, window.get_rect().height // 2 - 125, player_v_pc, 6)
-
-# button1 = Button(player_v_player.get_rect().x, player_v_player.get_rect().y, player_v_player, 6)
-# button2 = Button(window.get_rect().width // 2 - 90, window.get_rect().height // 2 - 125, player_v_pc, 6)
+button1 = Button(window.get_rect().width // 2 - 160, window.get_rect().height // 2 - 20, player_v_player, 6)
+button2 = Button(window.get_rect().width // 2 + 20, window.get_rect().height // 2 - 20, player_v_pc, 6)
 
 # this method is just a template for how to add this menu into main game loop
 # importent is to set main_menu to true in beginning and then switch to false once button is clicked
