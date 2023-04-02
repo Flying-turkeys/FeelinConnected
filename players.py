@@ -96,6 +96,7 @@ class GreedyPlayer(AbstractPlayer):
         """Uses logical calculations and a game tree to make a good move on the board
         Returns a tuple with the move and the message displayed"""
         possible_moves = board.possible_moves()
+
         random_move = random.choice(list(possible_moves))
         opponent_move = board.player_moves[self.opponent_id][-1]
         for move in possible_moves:
@@ -106,6 +107,7 @@ class GreedyPlayer(AbstractPlayer):
         if self._game_tree is None:  # The first move of the AI
             assert all(random_move not in board.player_moves[key] for key in board.player_moves)
             return (random_move, 'Random Move')
+
         else:
             # Goes into opponents move in the subtree
             if opponent_move != self._game_tree.move:
