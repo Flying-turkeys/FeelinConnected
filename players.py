@@ -61,8 +61,8 @@ class AbstractPlayer:
     def make_move(self, board: Board) -> None:
         """Abstract method for a player making a move on the board"""
         raise NotImplementedError
-        
-        
+
+
 class RandomPlayer(AbstractPlayer):
     """Connect 4  player which uses random moves to play"""
 
@@ -98,10 +98,15 @@ class GreedyPlayer(AbstractPlayer):
     def make_move(self, board: Board) -> Piece:
         """Uses logical calculations and a game tree to make a good move on the board"""
         possible_moves = board.possible_moves()
-        random_move = random.choice(list(possible_moves))
+        op_move_x = board.player_moves[self.opponent_id][-1].location[0]
+        side = random.choice([-1, 1])
+        move_x = (op_move_x + side) % board.width
+        move_y = 0
+        random_move = board.pieces[(move_x, move_y)]
 
         if self._game_tree is None:  # The first move of the AI
             assert all(random_move not in board.player_moves[key] for key in board.player_moves)
+
             return (random_move, 'Random Move')[0]
         else:
             # Goes into opponents move in the subtree

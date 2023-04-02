@@ -1,13 +1,15 @@
 """CSC111 Winter 2023 Final Project: Feelin Connected
+
+
 File Information
 ===============================
-This file contains any and all code required to run a pygame version of our
-Connect 4 implementation.
+This file contains any and all code required to run a pygame version of our Connect 4 implementation.
+
 This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
 """
 import pygame
-from board import Board, Piece
-from typing import Optional
+from board import Board
+from board import Piece
 from players import GreedyPlayer, generate_game_tree
 
 
@@ -258,7 +260,7 @@ class GameBoard(Board):
 
         running = True
         while running:
-
+            self.check_winner(game_surface)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -275,23 +277,23 @@ class GameBoard(Board):
             else:
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
-
-                        # if self.first_player_turn():
                         clicks = [slot.collidepoint(event.pos) for slot in self.slots]
                         if any(clicks):
+                            self.check_winner(game_surface)
                             new_move = self.player_click_to_coordinates(clicks)
                             convert_cord = self.convert_coordinates(new_move)
                             game_piece = self.pieces[convert_cord]
                             self.visualize_and_record_move(game_piece, game_surface)
                             self.check_winner(game_surface)
                             iteration += 1
-
                             if iteration >= 3:
-                                tree = generate_game_tree(self.player_moves['P1'][-1], self, 4)
+                                tree = generate_game_tree(self.player_moves['P1'][-1], self, 3)
                                 ai_player = GreedyPlayer(tree, 'P2')
 
-            pygame.display.update()
-
+            try:
+                pygame.display.update()
+            except pygame.error:
+                pass
         quit()
 
     def run_game(self) -> None:
@@ -305,3 +307,15 @@ class GameBoard(Board):
 
         else:
             print('Error: Game state is not specified')
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod(verbose=True)
+
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'max-nested-blocks': 4,
+        'extra-imports': ['board', 'players', 'pygame'],
+    })
