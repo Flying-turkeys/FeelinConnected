@@ -10,6 +10,9 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 
 if __name__ == '__main__':
     from gameplay import GameBoard
+    from players import GreedyPlayer, Person, generate_game_tree
+    from board import Board
+    
     b = GameBoard()
     b.run_game()
 
