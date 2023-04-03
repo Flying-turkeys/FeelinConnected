@@ -279,7 +279,7 @@ class GameBoard(Board):
         """Given a message produced by the AI in Player-verses-AI game state, dispplay that message at the
         top of the board.
         """
-        font_type = pygame.font.Font('Pixeltype.ttf', 45)
+        font_type = pygame.font.Font('game_elements/Pixeltype.ttf', 45)
         text = font_type.render(message, True, 'black')
         surface.blit(text, (20, 28))
         pygame.display.update()
@@ -304,18 +304,18 @@ class GameBoard(Board):
         clock = pygame.time.Clock()
 
         # loads different font sizes
-        font = pygame.font.Font('Pixeltype.ttf', 35)
-        font1 = pygame.font.Font('Pixeltype.ttf', 30)
-        font2 = pygame.font.Font('Pixeltype.ttf', 25)
+        font = pygame.font.Font('game_elements/Pixeltype.ttf', 35)
+        font1 = pygame.font.Font('game_elements/Pixeltype.ttf', 30)
+        font2 = pygame.font.Font('game_elements/Pixeltype.ttf', 25)
         # load pvp button images
-        pvp_image = pygame.image.load('button1_f.png').convert_alpha()
+        pvp_image = pygame.image.load('game_elements/button1_f.png').convert_alpha()
         pvp_image = pygame.transform.scale(pvp_image, (140, 140))
-        pvp_hover = pygame.image.load('button1-hovered_f.png').convert_alpha()
+        pvp_hover = pygame.image.load('game_elements/button1-hovered_f.png').convert_alpha()
         pvp_hover = pygame.transform.scale(pvp_hover, (140, 140))
         # load pvc button images
-        pvc_image = pygame.image.load('button2_f.png').convert_alpha()
+        pvc_image = pygame.image.load('game_elements/button2_f.png').convert_alpha()
         pvc_image = pygame.transform.scale(pvc_image, (140, 140))
-        pvc_hover = pygame.image.load('button2-hovered_f.png').convert_alpha()
+        pvc_hover = pygame.image.load('game_elements/button2-hovered_f.png').convert_alpha()
         pvc_hover = pygame.transform.scale(pvc_hover, (140, 140))
 
         ################################################################
