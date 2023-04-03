@@ -13,6 +13,7 @@ if __name__ == '__main__':
     from players import GreedyPlayer, Person, generate_game_tree
     from board import Board
 
+    # To play AI in console comment line 17 and 18 and uncomment lines 24 - 51
     b = GameBoard()
     b.run_game()
 
