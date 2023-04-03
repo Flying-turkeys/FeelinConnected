@@ -429,7 +429,7 @@ class GameBoard(Board):
         """Given a message produced by the Ai in Player-verses-Ai game state, dispplay that message at the
         top of the board.
         """
-        font_type = pygame.font.Font('Pixeltype.ttf', 45)
+        font_type = pygame.font.Font('game_elements/Pixeltype.ttf', 45)
         text = font_type.render(message, True, 'black')
         surface.blit(text, (20, 28))
         pygame.display.update()
@@ -557,7 +557,7 @@ class GameBoard(Board):
                 pygame.display.update()
             except pygame.error:
                 return self.get_winner()
-                
+
         quit()
 
     def run_game(self) -> None:
