@@ -471,7 +471,7 @@ class GameBoard(Board):
                 self.check_winner(game_surface)
                 iteration += 1
             else:
-                # self.display_ai_message("Your Turn", game_surface)
+                self.display_ai_message("Your Turn Human", game_surface)
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         clicks = [slot.collidepoint(event.pos) for slot in self.slots]
