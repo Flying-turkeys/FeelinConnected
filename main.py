@@ -12,7 +12,7 @@ if __name__ == '__main__':
     # from players import GreedyPlayer, RandomPlayer, generate_game_tree
 
     b = GameBoard()
-    b.run_pvc_state()
+    b.run_game()
 
     # bd = Board(6)
     # tree = None

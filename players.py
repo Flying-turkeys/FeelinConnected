@@ -1,9 +1,7 @@
 """CSC111 Winter 2023 Final Project: Feelin Connected
-
 File Information
 ===============================
 This file contains the data classes that will compose the AI used to create the Connect 4 game.
-
 This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
 """
 
@@ -14,20 +12,17 @@ from board import Piece
 import game_tree as gt
 
 
-def generate_game_tree(root_move: Piece | str, game_state: Board, d: int) -> gt.GameTree:
+def generate_game_tree(root_move: Piece, game_state: Board, d: int) -> gt.GameTree:
     """Generate a complete game tree of depth d for all valid moves from the current game_state.
+    Note that this function can only generate subtrees if the game_state is not a starting state.
     For the returned GameTree:
         - Its root move is root_move.
         - It contains all possible move sequences of length <= d from game_state.
         - If d == 0, a size-one GameTree is returned.
     Preconditions:
         - d >= 0
-        - root_move == a2_game_tree.GAME_START_MOVE or root_move is a valid move
-        - if root_move == a2_game_tree.GAME_START_MOVE, then game_state is in the initial game state
-        - if isinstance(root_move, str) and root_move != a2_game_tree.GAME_START_MOVE,\
-            then (game_state.guesses[-1] == root_move) and (not game_state.is_guesser_turn())
-        - if isinstance(root_move, tuple),\
-            then (game_state.statuses[-1] == root_move) and game_state.is_guesser_turn()
+        - game_state is not a starting game state
+        - root_move is the last move made in game_state
     """
     game_tree = gt.GameTree(root_move)
     possibles = game_state.possible_moves()
@@ -63,21 +58,8 @@ class AbstractPlayer:
         raise NotImplementedError
 
 
-# TODO: delete for final submission
-class Person(AbstractPlayer):
-    """Abstract player who represents a real person playing"""
-
-    def make_move(self, board: Board) -> Piece:
-        """Abstract method for a player making a move on the board"""
-        possible_moves = board.possible_moves()
-        column = int(input("Column: "))
-        for move in possible_moves:
-            if move.location[0] == column:
-                return board.pieces[move.location]
-
-
 class RandomPlayer(AbstractPlayer):
-    """Connect 4  player which uses random moves to play"""
+    """Connect 4 player which uses random moves to play"""
 
     def make_move(self, board: Board) -> Piece:
         """Makes a random move based off of a boards possible moves"""
@@ -90,7 +72,7 @@ class GreedyPlayer(AbstractPlayer):
     # Private Instance Attributes:
     #   - _game_tree:
     #       The GameTree that this player uses to make its moves. If None, then this
-    #       player behaves like aw.RandomGuesser.
+    #       player behaves random
     _game_tree: Optional[gt.GameTree]
     player_id: str
     opponent_id: str
@@ -108,19 +90,26 @@ class GreedyPlayer(AbstractPlayer):
         else:
             self.opponent_id = 'P1'
 
-    def make_move(self, board: Board) -> Piece:
-        """Uses logical calculations and a game tree to make a good move on the board"""
+    def make_move(self, board: Board) -> tuple[Piece, str]:
+        """Uses logical calculations and a game tree to make a good move on the board
+        Returns a tuple with the move and the message displayed"""
         possible_moves = board.possible_moves()
+
         random_move = random.choice(list(possible_moves))
+        opponent_move = board.player_moves[self.opponent_id][-1]
+        for move in possible_moves:
+            if move.location[0] in {opponent_move.location[0] - 1, opponent_move.location[0] + 1}:
+                random_move = move
+                break
 
         if self._game_tree is None:  # The first move of the AI
             assert all(random_move not in board.player_moves[key] for key in board.player_moves)
-            return (random_move, 'Random Move')[0]
+            return (random_move, 'Random Move')
+
         else:
             # Goes into opponents move in the subtree
-            oponent_move = board.player_moves[self.opponent_id][-1]
-            if oponent_move != self._game_tree.move:
-                self._game_tree = self._game_tree.find_subtree_by_move(oponent_move.location)
+            if opponent_move != self._game_tree.move:
+                self._game_tree = self._game_tree.find_subtree_by_move(opponent_move.location)
 
             # Checks if there is a crucial move to make
             crucial_move = self.check_crucial_move(possible_moves, board)
@@ -143,13 +132,13 @@ class GreedyPlayer(AbstractPlayer):
             # Make an educated move instead, avoiding the game tree moves
             new_possibles = {move for move in possible_moves if move.location != sub.move.location}
             if sub.player_winning_probability[self.opponent_id] == 1.0 and new_possibles != set():
-                return (self.educated_move(new_possibles, board), 'Educated Move')[0]
+                return (self.educated_move(new_possibles, board), 'Educated Move')
 
             self._game_tree = sub
             assert all(sub.move not in board.player_moves[key] for key in board.player_moves)
-            return (sub.move, "Subtree Move")[0]
+            return (sub.move, "Umm let me think")
 
-    def check_crucial_move(self, possible_moves: set[Piece], board: Board) -> Optional[Piece]:
+    def check_crucial_move(self, possible_moves: set[Piece], board: Board) -> Optional[tuple[Piece, str]]:
         """Returns a move if either p1 or p2 are can make a move to win. If AI has a winning move
         it will take that move. If the opponent has a winning move it will block that move. If both have an
         opprotunity to win the AI will choose the move to make itself win.
@@ -160,12 +149,12 @@ class GreedyPlayer(AbstractPlayer):
             hypo1 = board.copy_and_record_move(move.location, self.player_id)
             if hypo1.get_winner() is not None and hypo1.get_winner()[0] == self.player_id:
                 assert all(move not in board.player_moves[key] for key in board.player_moves)
-                return (move, 'Got You')[0]
+                return (move, 'I win')
         for move in possible_moves:
             hypo2 = board.copy_and_record_move(move.location, self.opponent_id)
             if hypo2.get_winner() is not None and hypo2.get_winner()[0] == self.opponent_id:
                 assert all(move not in board.player_moves[key] for key in board.player_moves)
-                return (move, 'Get Blocked')[0]
+                return (move, 'Get Blocked')
         return None
 
     def educated_move(self, possible_moves: set[Piece], board: Board) -> Piece:
