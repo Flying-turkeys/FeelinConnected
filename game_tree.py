@@ -9,8 +9,7 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 
 from __future__ import annotations
 from typing import Optional
-from board import Board
-from board import Piece
+from board import Board, Piece
 GAME_START_MOVE = '*'
 
 
@@ -101,8 +100,10 @@ class GameTree:
                                                             for subtree in subs)
 
 
-def score_of_move(move: Piece, board: Board, player_id) -> float:
-    """Returns score of connection"""
+def score_of_move(move: Piece, board: Board, player_id: str) -> float:
+    """Returns score of move in a weighted form, where more connections in less directions
+    is valued more than multiple connections in more directions.
+    """
     hypo_state = board.copy_and_record_move(move.location, player_id)
     lengths_so_far = []
     for direction in move.connections:

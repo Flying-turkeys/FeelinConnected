@@ -43,7 +43,7 @@ class Piece:
         self.player = player
 
     def find_path(self, visited: set[Piece], direction: str) -> set[Piece]:
-        """Returns path in a specific direction"""
+        """Returns path in a specific direction using recursion"""
         connects = self.connections[direction]
 
         if len(connects) == 1 and connects[0].get_other_endpoint(self) in visited:

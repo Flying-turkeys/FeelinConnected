@@ -1,14 +1,15 @@
 """CSC111 Winter 2023 Final Project: Feelin Connected
+
 File Information
 ===============================
 This file contains the data classes that will compose the AI used to create the Connect 4 game.
+
 This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
 """
 
 import random
 from typing import Optional
-from board import Board
-from board import Piece
+from board import Board, Piece
 import game_tree as gt
 
 
@@ -130,7 +131,7 @@ class GreedyPlayer(AbstractPlayer):
 
             # If every move in the tree make leads to a good move for the opponent
             # Make an educated move instead, avoiding the game tree moves
-            new_possibles = {move for move in possible_moves if move.location != sub.move.location}
+            new_possibles = {piece for piece in possible_moves if piece.location != sub.move.location}
             if sub.player_winning_probability[self.opponent_id] == 1.0 and new_possibles != set():
                 return (self.educated_move(new_possibles, board), 'Educated Move')
 
@@ -158,7 +159,8 @@ class GreedyPlayer(AbstractPlayer):
         return None
 
     def educated_move(self, possible_moves: set[Piece], board: Board) -> Piece:
-        """Returns a piece/move that makes the most connections in a weighted form
+        """Returns a piece/move that makes the most connections in a weighted form where,
+         more connections in less directions is valued more than multiple connections in more directions.
         Precondition:
             - possible_moves are valid moves on the board
         """

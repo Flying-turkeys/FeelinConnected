@@ -1,4 +1,5 @@
 """CSC111 Winter 2023 Final Project: Feelin Connected
+
 File Information
 ===============================
 This file contains any and all code required to run a pygame version of our Connect 4 implementation.
@@ -6,10 +7,12 @@ This file contains any and all code required to run a pygame version of our Conn
 This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukhjeet Singh Nar.
 """
 import random
+from typing import Optional
 import pygame
 from board import Board, Piece
 from players import GreedyPlayer, generate_game_tree
 from gameplay_additions import Button
+
 
 # Colours used within the implementation:
 # SALMON KHAKI PIECES WITH AQUAMARINE BOARD, LIGHT GREY BACKGROUND
@@ -18,7 +21,15 @@ P1_SALMON = (250, 128, 114)
 P2_KHAKI = (255, 165, 0)
 BA_LAVANDAR = (230, 230, 250)
 THISTLE = (216, 191, 216)
-RANDOM_COLOURS = [(102, 205, 170), (250, 128, 114), (255, 165, 0), (205, 92, 92), (152, 251, 152), (255, 127, 80), (255, 91, 71)]
+RANDOM_COLOURS = [
+    (102, 205, 170),
+    (250, 128, 114),
+    (255, 165, 0),
+    (205, 92, 92),
+    (152, 251, 152),
+    (255, 127, 80),
+    (255, 91, 71)
+]
 
 
 class GameBoard(Board):
@@ -27,13 +38,13 @@ class GameBoard(Board):
     game.
 
     Instance Atrributes:
-        - slots: a list of pygame rectangles that represent each slot (either filled
-        or unfilled with a token) on the board
-        - column_space: a mapping of the pygame x-coordidnates of each column to a set of all remaining
-        row y-coordinates
-        - game_state: a str, either PVP or PVC, which determines whether the game should be played
-        utilizing two player inputs (PVP), versus a player input and a Computer/AI input (PVC)
-
+        - slots:
+            a list of pygame rectangles that represent each slot (either filled or unfilled with a token) on the board
+        - column_space:
+            a mapping of the pygame x-coordidnates of each column to a set of all remaining row y-coordinates
+        - game_state:
+            a str, either PVP or PVC, which determines whether the game should be played
+            utilizing two player inputs (PVP), versus a player input and a Computer/AI input (PVC)
     Representation Invarients:
         - len(slots) == self.width ** 2
         - self.game_state in {'PVP', 'PVC', 'unspecified'}
@@ -115,20 +126,21 @@ class GameBoard(Board):
 
         return new_coordinate
 
-    def remaining_column_space(self, x_coordinate: float) -> float:
+    def remaining_column_space(self, x_coordinate: float) -> Optional[float]:
         """Return the remaining pygame y-coordinate in the column pertaining to x-coordintate
         on the game surface."""
 
         remaining_cords = self.column_spaces[x_coordinate]
-        min_y = self._proportionality + self._proportionality / 2
+        # min_y = self._proportionality + self._proportionality / 2
 
         if len(remaining_cords):
             coordinate = max(remaining_cords)
             self.column_spaces[x_coordinate].remove(coordinate)
             return coordinate
-        else:
-            print('You cannot place there anymore!')
-            return min_y
+        return None
+        # else:
+        #     print('You cannot place there anymore!')
+        #     return min_y
 
     def determine_colour(self, opposite: bool = False) -> tuple[int, int, int]:
         """Return the colour that should be displayed on the game board. If opposite
@@ -145,7 +157,7 @@ class GameBoard(Board):
             else:
                 return P1_SALMON
 
-    def player_click_to_coordinates(self, clicks: list[bool]) -> tuple[float, float]:
+    def player_click_to_coordinates(self, clicks: list[bool]) -> Optional[tuple[float, float]]:
         """Depending on where the player clicks on the game surface (given through the
         index of the list, clicks), return the pygame coordinates for where the token should be placed."""
 
@@ -154,8 +166,10 @@ class GameBoard(Board):
 
         x_cord = clicked_circle.centerx + 0.5  # In order to ensure a float is returned.
         y_cord = self.remaining_column_space(x_cord)
-
-        return (x_cord, y_cord)
+        if y_cord is not None:
+            return (x_cord, y_cord)
+        else:
+            return None
 
     def visualize_and_record_move(self, move: Piece, surface: pygame.Surface) -> None:
         """Record the move within the board graph and equally display the move on the
@@ -189,13 +203,11 @@ class GameBoard(Board):
             if self.get_winner()[0] != "Tie":
                 self.fill_winner_colour(surface)
                 pygame.display.update()
-                print(self.get_winner()[0], "is the winner!")
                 pygame.display.quit()
 
             else:
                 surface.fill(BA_LAVANDAR)
                 pygame.display.update()
-                print('Hey its a tie! Try again next time.')
                 pygame.display.quit()
 
             # display the menu again with new game options.
@@ -212,7 +224,6 @@ class GameBoard(Board):
         sequence = self.get_winner()[1]
 
         if player == 'P1':
-
             for circle in sequence:
                 coordinates = self.convert_coordinates(tuple(circle))
                 pygame.draw.circle(surface=surface,
@@ -230,7 +241,7 @@ class GameBoard(Board):
                                    radius=self._proportionality // 2 - 3)
                 pygame.display.update()
 
-        pygame.time.wait(10000)
+        pygame.time.wait(2000)
 
     def piece_drop_animation(self, x_coordinate: float, surface: pygame.Surface) -> None:
         """Add a dropping effect to where a game piece is being placed."""
@@ -256,7 +267,6 @@ class GameBoard(Board):
         Preconditions:
             - self.game_state == "PVP"
         """
-
         pygame.draw.rect(surface, BA_LAVANDAR, (0, 0, self.width * self._proportionality, self._proportionality))
         pygame.draw.circle(surface=surface,
                            color=self.determine_colour(),
@@ -406,6 +416,8 @@ class GameBoard(Board):
                     if any(clicks):
                         self.check_winner(game_surface)
                         new_move = self.player_click_to_coordinates(clicks)
+                        if new_move is None:
+                            break
                         convert_cord = self.convert_coordinates(new_move)
                         game_piece = self.pieces[convert_cord]
                         self.visualize_and_record_move(game_piece, game_surface)
@@ -466,6 +478,8 @@ class GameBoard(Board):
                         if any(clicks):
                             self.check_winner(game_surface)
                             new_move = self.player_click_to_coordinates(clicks)
+                            if new_move is None:
+                                break
                             convert_cord = self.convert_coordinates(new_move)
                             game_piece = self.pieces[convert_cord]
                             self.visualize_and_record_move(game_piece, game_surface)
@@ -489,12 +503,10 @@ class GameBoard(Board):
 
         if self.game_state == 'PVP':
             self.run_pvp_state()
-
         elif self.game_state == 'PVC':
             self.run_pvc_state()
-
         else:
-            print('Error: Game state is not specified')
+            pass
 
 
 if __name__ == '__main__':
@@ -505,7 +517,16 @@ if __name__ == '__main__':
     python_ta.check_all(config={
         'max-line-length': 120,
         'max-nested-blocks': 4,
-        'extra-imports': ['game_tree', 'board', 'pygame', 'players', 'random'],
-        'disable': ['unused-import', 'too-many-branches', 'too-many-nested-blocks', 'too-many-locals'],
+        'extra-imports': ['game_tree',
+                          'board',
+                          'pygame',
+                          'players',
+                          'random',
+                          'gameplay_additions',
+                          'typing'],
+        'disable': ['unused-import',
+                    'too-many-branches',
+                    'too-many-nested-blocks',
+                    'too-many-locals'],
 
     })

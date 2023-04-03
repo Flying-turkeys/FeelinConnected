@@ -10,6 +10,9 @@ This file is Copyright (c) 2023 Ethan McFarland, Ali Shabani, Aabha Roy and Sukh
 
 if __name__ == '__main__':
     from gameplay import GameBoard
-
     b = GameBoard()
     b.run_game()
+
+    ################################
+    # For testing AI accuracy in console
+    ################################
