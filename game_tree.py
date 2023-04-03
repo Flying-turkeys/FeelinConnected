@@ -17,6 +17,7 @@ class GameTree:
     Each node in the tree stores a Connect 4 move (Piece).
     Instance Attributes:
         - move: the new game state being passed into the tree
+        - player_winning_probability: the winning probability of the tree's root
     Representation Invariants:
         - self.move == GAME_START_MOVE or isinstance(self.move, Piece)
         - all(key == self._subtrees[key].move for key in self._subtrees)
