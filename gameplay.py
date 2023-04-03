@@ -1,6 +1,4 @@
 """CSC111 Winter 2023 Final Project: Feelin Connected
-
-
 File Information
 ===============================
 This file contains any and all code required to run a pygame version of our Connect 4 implementation.
@@ -360,83 +358,6 @@ class GameBoard(Board):
         else:
             self.game_state = "PVC"
 
-    def fill_winner_colour(self, surface: pygame.Surface) -> None:
-        """If a player has won, fill the winning sequence of moves with a darker colour."""
-
-        dark_red = (220, 20, 60)
-        dark_orange = (255, 255, 0)
-
-        player = self.get_winner()[0]
-        sequence = self.get_winner()[1]
-
-        if player == 'P1':
-
-            for circle in sequence:
-                coordinates = self.convert_coordinates(tuple(circle))
-                pygame.draw.circle(surface=surface,
-                                   color=dark_red,
-                                   center=coordinates,
-                                   radius=self._proportionality // 2 - 3)
-                pygame.display.update()
-        else:
-
-            for circle in sequence:
-                coordinates = self.convert_coordinates(tuple(circle))
-                pygame.draw.circle(surface=surface,
-                                   color=dark_orange,
-                                   center=coordinates,
-                                   radius=self._proportionality // 2 - 3)
-                pygame.display.update()
-
-        pygame.time.wait(10000)
-
-    def piece_drop_animation(self, x_coordinate: float, surface: pygame.Surface) -> None:
-        """Add a dropping effect to where a game piece is being placed."""
-
-        y_coordinates = self.column_spaces[x_coordinate]
-        y_coordinates.sort()
-        for y in y_coordinates:
-            pygame.draw.circle(surface=surface,
-                               color=self.determine_colour(),
-                               center=(x_coordinate, y),
-                               radius=self._proportionality // 2 - 3)
-            pygame.display.update()
-            pygame.time.wait(80)
-            pygame.draw.circle(surface=surface,
-                               color=BA_LAVANDAR,
-                               center=(x_coordinate, y),
-                               radius=self._proportionality // 2 - 3)
-            pygame.display.update()
-
-    def draw_slider(self, coordinates: tuple[float, float], surface: pygame.Surface) -> None:
-        """Given the coordinates of the mouse position from the game while loop, create a
-        game picce slider that allows a player to see which token they are placing.
-
-        Preconditions:
-            - self.game_state == "PVP"
-
-        """
-
-        pygame.draw.rect(surface, BA_LAVANDAR, (0, 0, self.width * self._proportionality, self._proportionality))
-        pygame.draw.circle(surface=surface,
-                           color=self.determine_colour(),
-                           center=coordinates,
-                           radius=self._proportionality // 2 - 3)
-
-        pygame.display.update()
-
-    def display_ai_message(self, message: str, surface: pygame.Surface) -> None:
-        """Given a message produced by the Ai in Player-verses-Ai game state, dispplay that message at the
-        top of the board.
-        """
-        font_type = pygame.font.Font('game_elements/Pixeltype.ttf', 45)
-        text = font_type.render(message, True, 'black')
-        surface.blit(text, (20, 28))
-        pygame.display.update()
-        pygame.time.wait(1500)
-        pygame.draw.rect(surface, BA_LAVANDAR, (0, 0, self.width * self._proportionality, self._proportionality))
-        pygame.display.update()
-
     def run_pvp_state(self) -> None:
         """Run a Player-versus-player game."""
 
@@ -538,6 +459,7 @@ class GameBoard(Board):
                 self.check_winner(game_surface)
                 iteration += 1
             else:
+                # self.display_ai_message("Your Turn", game_surface)
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         clicks = [slot.collidepoint(event.pos) for slot in self.slots]
@@ -557,7 +479,7 @@ class GameBoard(Board):
                 pygame.display.update()
             except pygame.error:
                 return self.get_winner()
-                
+
         quit()
 
     def run_game(self) -> None:
@@ -585,4 +507,5 @@ if __name__ == '__main__':
         'max-nested-blocks': 4,
         'extra-imports': ['game_tree', 'board', 'pygame', 'players', 'random'],
         'disable': ['unused-import', 'too-many-branches', 'too-many-nested-blocks', 'too-many-locals'],
+
     })
