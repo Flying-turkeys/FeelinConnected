@@ -57,6 +57,16 @@ class AbstractPlayer:
     def make_move(self, board: Board) -> None:
         """Abstract method for a player making a move on the board"""
         raise NotImplementedError
+        
+class Person(AbstractPlayer):
+    """A person playing Connect 4"""
+    def make_move(self, board: Board) -> Piece:
+        """Abstract method for a player making a move on the board"""
+        possible_moves = board.possible_moves()
+        column = int(input("Column: "))
+        for move in possible_moves:
+            if move.location[0] == column:
+                return board.pieces[move.location]
 
 
 class RandomPlayer(AbstractPlayer):
