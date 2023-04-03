@@ -12,4 +12,5 @@ if __name__ == '__main__':
     from gameplay import GameBoard
 
     b = GameBoard()
-    b.run_pvc_state()
+    b.run_game()
+
