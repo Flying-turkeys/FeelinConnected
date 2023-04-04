@@ -433,7 +433,7 @@ class GameBoard(Board):
     def run_pvc_state(self) -> None:
         """Run a Player-versus-Computer/AI game."""
 
-        ################################################################
+        ######################################################################
         # Initialize all necessary components of pygame:
 
         pygame.init()
@@ -445,7 +445,7 @@ class GameBoard(Board):
         pygame.display.flip()
         clock = pygame.time.Clock()
 
-        ################################################################
+        #########################################################################
         tree = None
         ai_player = GreedyPlayer(tree, 'P2')
 
@@ -497,7 +497,7 @@ class GameBoard(Board):
         quit()
 
     def run_game(self) -> None:
-        """Run the game implementation."""
+        """Run the game implementation. With the menu popping up"""
 
         self.create_and_display_menu()
 

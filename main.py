@@ -18,7 +18,7 @@ if __name__ == '__main__':
     b.run_game()
 
     ################################################################################################
-    # For testing AI accuracy in console, comment out the code above and run the following
+    # For testing AI accuracy in console, comment out the code above and run the following code
     ################################################################################################
 
     # bd = Board(7)
